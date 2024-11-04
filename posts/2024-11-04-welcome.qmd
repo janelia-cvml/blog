@@ -1,0 +1,15 @@
+---
+title: "Welcome"
+author: 
+    - name: CVML organizers 
+date: "11/04/2024"
+notebook-links: global
+format:
+  html:
+    toc: true
+---
+
+## Welcome to the CVML blog
+
+This page will highlight some papers recommended by Janelia's computer vision and machine learning researchers.
+

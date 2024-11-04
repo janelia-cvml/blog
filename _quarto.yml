@@ -1,0 +1,28 @@
+project:
+  type: website
+
+website:
+  title: "Janelia CVML"
+  image: cvml-icon-100x100.png
+  favicon: favicon.ico
+  navbar:
+    logo: cvml-icon-100x100.png
+    left:
+      - href: about.qmd
+        text: About
+    right:
+      - icon: card-text
+        href: https://www.janelia.org/our-research/computation-and-theory
+      - icon: rss
+        href: index.xml
+  open-graph: true
+  repo-url: https://github.com/janelia-cvml/blog
+  site-url: https://janelia-cvml.github.io/blog
+format:
+  html:
+    theme: cosmo 
+    css: styles.css
+    code-fold: show
+    code-overflow: wrap
+    code-tools:
+      source: repo

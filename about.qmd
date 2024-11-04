@@ -1,0 +1,11 @@
+---
+title: "Computer Vision and Machine Learning at Janelia"
+about:
+  template: solana
+format:
+  html:
+    code-tools: false
+---
+
+Researchers at Janelia have been participating in a weekly journal club on computer vision and machine learning (CVML) since 2014. This
+page will highlight some of our favorite papers.
