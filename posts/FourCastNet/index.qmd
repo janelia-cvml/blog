@@ -1,0 +1,122 @@
+---
+title: "FourCastNet"
+description: "Weather forecasting with Adaptive Fourier Neural Operators"
+author: "Kristin Branson and Magdelena Schneider"
+date: "2024-11-08"
+categories: [AIForScience, NumericalMethods, Transformers, Weather]
+image: "FourCastNetArchitecture.png"  # Optional
+---
+
+*Neural Operators and Fourier Neural Operator papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01, Adaptive Fourier Neural Operator and FourCastNet papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08*
+
+To date, weather forecasts are based on **numerical weather prediction**: numerical integration of partial differential equations (PDEs) describing atmospheric motion from measured initial conditions. The equations governing weather have been researched since the early 1900s [[Lynch, 2008]](#Lynch2008), and numerically solving these PDEs was an early success of computers [[Charney, 1952]](#Charney1952). Steady improvements in forecasting accuracy have been made, including improved data and data assimilation and numerical methods (@fig-ecwmf-accuracy).
+
+::: {#fig-ecwmf-accuracy style="float: left; margin-right: 1em;"}
+![](ForecastingAccuracyOverTime.png){width=500px}
+
+Improvements in ECWMF forecast accuracy [[Haiden, 2021]](#Haiden2021)
+:::
+
+There's a pretty **remarkable dataset** available in the realm of AI for science: the [ERA5 global reanalysis](https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.4803) dataset, which contains *hourly* estimates of numerous 3D atmospheric, land, and ocean features at a *horizontal resolution* of 30 km over the past *80 years*. This dataset was synthesized from up to 25M-per-day measurements from Earth-observing satellites and weather stations. Can machine learning be used to learn to forecast the weather better, either by more efficiently/effectively solving the weather PDEs or by learning a better model? 
+
+The FourCastNet paper [[Pathak, 2022](#Parthak2022)] trains an **Adaptive Fourier Neural Operator** (AFNO) network [[Guibas, 2022]](#Guibas2022) to predict a collection of atmospheric variables at the next time step (6 hours into the future) given the current readout for those variables. The AFNO is an interesting choice here: it takes inspiration from both **neural operators**, which are designed to efficiently solve PDEs, and **Vision Transformers** (ViT), which can learn complex functions from large image datasets. We know that weather is well-modeled by PDEs, and the ERA 5 dataset is converted into images where each pixel location corresponds to a $.25^\circ \times .25^\circ$ latitude/longitude region, and each channel corresponds to a different atmospheric variable, so maybe some amalgam of neural operators and transformers makes sense. 
+
+::: {#fig-fourcastnet-architecture fig-align="center" style="text-align: center;"}
+![](FourCastNetArchitecture.png){width=400px}
+
+FourCastNet architecture overview [[Pathak, 2022](#Pathak2022)]
+:::
+
+## Training
+
+One of the issues with almost every temporal process is that it has multiple time scales that we want to model. To predict the weather $k$ time points into the future, FourCastNet must be run iteratively $k$ times, and errors can accumulate so that inputs are out-of-domain. So, instead of training on the full temporal resolution of the data, FourCastNet is trained at 6-hour resolution. Probably badness would happen if it was trained at 1-hour resolution, and then run iteratively $6k$ times. Interestingly, they first train on 6-hour predictions, then fine-tune to minimize 12-hour prediction errors when calling the network twice recursively. 
+
+## Evaluation
+
+Most of the paper is devoted to evaluating the performance of the weather forecasts. They show that their predictions are qualitatively accurate on predicting the formation and trajectory of a cyclone and hurricane and patterns of an atmospheric river within the range of 2-4 days. They quantitatively compare the accuracy of the FourCastNet prediction to the  ECMWF's physics-based Integrated Forecasting System (IFS). Accuracy is worse (with a few exceptions), but comparable. More recent ML-based models, including GraphCast [[Lam, 2023]](#Lam2023) and GenCast [[Price, 2024]](#Price2024) report performance better than ECMWF's. 
+
+::: {#fig-storm-forecasts fig-align="center" style="text-align: center;"}
+![](StormFormationForecast.png){width=600px}
+
+Forecasting the formation of major storms [[Pathak, 2022](#Pathak2022)]
+:::
+
+The improvement stressed in this work is **computational**, particularly when predicting an **ensemble of forecasts**. Here, they add Gaussian noise to the initial observations and produce slightly different forecasts to estimate the distribution. While the IFS forecast takes minutes on a giant supercomputing cluster, FourCastNet's forecast takes **7 seconds** on 4 A100s There's a bit of apples to oranges in this comparison, both in terms of the problem and the type of computers when reporting just how much more efficient their approach is, but it is unquestionably more efficient. This is also the improvement that neural operators offer over classical methods for solving PDEs. 
+
+## Thoughts
+
+One closing question is about **how ML solves this problem**. Is it learning to model the weather in the same way that the governing physics equations do? Or is it more about learning what initial conditions are similar and memorizing? In some ways, memorization seems like it may be a step backwards -- before numerical weather prediction was a thing, meteorologists did something closer to memorization:
+
+> Richardson’s book opens with a discussion of then-current practice in the Meteorological Office. He describes the use of an Index of Weather Maps, constructed by classifying old synoptic charts into categories. The Index assisted the forecaster to find previous maps resembling the current one and therewith to deduce the likely development by studying the evolution of these earlier cases. But Richardson was not optimistic about this method. He wrote that "The forecast is based on the supposition that what the atmosphere
+did then, it will do again now. ... The past history of the atmosphere is used, so to speak, as a full-scale working model of its present self". ... the Nautical Almanac, that marvel of accurate forecasting, is not based on the principle that astronomical history repeats itself in the aggregate. It would be safe to say that a particular disposition of stars, planets and satellites never occurs twice. Why then should we expect a present weather map to be exactly represented in a catalogue of past weather?
+
+-- From [[Lynch, 2008]](#Lynch2008)
+
+**Things I'm taking away from this paper:**
+
+* ERA 5 is a cool dataset!
+* It's going to allow ML to beat physics at weather forecasting, with lots of caveats about the classical work that goes into assimilating raw observations into these nicely gridded measurements, and probably lots of things I don't understand about weather. Will be there be noticeable improvements to us in our weather forecasts soon??
+* There's a lot of work to do on the details of what data is used, what is predicted, and how it is evaluated. I was happy to see that the ECMWF now has an experimental [AIFS](https://www.ecmwf.int/en/about/media-centre/aifs-blog/2023/ECMWF-unveils-alpha-version-of-new-ML-model) -- the  Artificial Intelligence/Integrated Forecasting System. They've released [implementations](https://www.ecmwf.int/en/about/media-centre/aifs-blog/2024/run-ai-models-yourself-ecmwf-open-data) of several of the SOTA models that you can get with 
+`pip install ai-models`
+* AFNO is an interesting choice because of (a) its connection to PDEs that underly many processes we want to model and (b) computational efficiency. 
+
+## About the AFNO
+
+We spent some time trying to understand the AFNO, and its relationship to both PDEs and the transformer. A stated goal of the AFNO is to capture important properties of the transformer, but reduce the memory and computational requirements to not depend on the context length / number of image patches squared. This is important in the FourCastNet context, as each weather image has $1440/8 \cdot 720/8 = 16,200$ patches. 
+
+Each AFNO block does the following:
+
+* Let $X \in \mathcal{R}^{h \times w \times d}$ be the input. 
+* Use the patch location $(m,n)$ to convert to frequency space:
+$$z_{uv} = [DFT(X)]_{uv} = \frac{1}{\sqrt{mn}} \sum_{mn} x_{mn} \exp( - 2\pi i (um/h+vn/w) ).$$
+This can be viewed as token mixing, creating direct connections between every input spatial token $x_{uv}$ and frequency token $z_{mn}$. 
+* In the frequency space, channels are adaptively mixed through 2-layer MLPs: 
+$$\tilde{z}_{uv} = \text{BlockMLP}(z_{uv}) = W_2 \sigma( W_1 z_{uv} )$$
+where $W_1, W_2 \in \mathcal{R}^{d \times d}$ are learned block-diagonal matrices. Note that this is described as part of the "spatial mixing" of AFNO, even though, as far as I can tell, it only mixes across channels. 
+* Demix tokens with the inverse Fourier transform: 
+$$y_{mn} = [IDFT(\tilde{Z})]_{mn} = \frac{1}{\sqrt{mn}} \sum_{uv} \tilde{z}_{uv} \exp( 2 \pi i (um/h+vn/w) )$$
+* Perform another two-layer MLP to mix across channels in the spatial domain:
+$$\tilde{y}_{mn} = \text{BlockMLP}(y_{mn})$$
+This step is not mentioned, as far as we can tell, in the text of the AFNO paper, but is in @fig-fourcastnet-architecture and the AFNO code base. It is referred to as channel mixing. 
+
+Like the MLP mixer, its relationship to the transformer is most obviously that there is some mixing across tokens and mixing across channels. As I understand it, mixing across tokens is through the Fourier transforms, and thus is not learned or input-dependent, but there are direct connections between all tokens. 
+
+The AFNO paper also shows that a self-attention layer can (ish) be expressed as a kernel integral:
+$$
+Att(X) = \text{softmax}( XW_q(X W_k)^\top / \sqrt{d} ) X W_v
+$$
+$$
+Att(X)[t] = \sum_t X[t] \kappa(s,t)
+$$
+$$\kappa(s,t) = \text{softmax}( XW_q(X W_k)^\top / \sqrt{d} ) W_v$$
+Note that $\kappa$ is a *kernel that depends on* $X[t]$. 
+Viewing $X$ as a function on the continuous space $D \subset \mathcal{R}^2$ instead of as a matrix with values at discrete indices, they write this sum as an integral:
+$$\mathcal{K}(X)(s) = \int_D \kappa(s,t) X(t).$$
+If $\kappa$ were shift-invariant (which is not generally the case), with $\kappa(s,t) = \kappa(s-t)$, then we could compute this integral with convolution in the Fourier domain:
+$$\mathcal{K}(X)(s) = \mathcal{F}^{-1}( \mathcal{F}(\kappa) \cdot \mathcal{F}(X))(s).$$
+There is a tenuous relationship between these equations and the steps of the AFNO. However, as far as I can tell, the kernel in the AFNO does not depend on $X$, which both makes it inherently different from a transformer, and removes the quadratic complexity. 
+
+## References
+
+<a id="Pathak2022">[Pathak, 2022]</a> 
+Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar, "FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators", 2022, [url](https://arxiv.org/pdf/2202.11214)
+
+<a id="Lynch2008">[Lynch, 2008]</a>
+Peter Lynch, "The origins of computer weather prediction and climate modeling", 2008, [url](https://doi.org/10.1016/j.jcp.2007.02.034)
+
+<a id="Charney1952">[Charney, 1952]</a>
+J. G. Charney, R. Fjortoft, & J. Von Neumann, "Numerical integration of the barotropic vorticity equation", 1952, [url](https://www.tandfonline.com/doi/abs/10.3402/tellusa.v2i4.8607)
+
+<a id="Haiden2021">[Haiden, 2021]</a>
+T. Haiden, M. Janousek, F. Vitart, Z. Ben Bouallegue, L. Ferranti, F. Prates, and D. Richardson, "Evaluation of ECMWF forecasts, including the 2021 upgrade", 2021, [url](https://www.ecmwf.int/en/elibrary/81235-evaluation-ecmwf-forecasts-including-2021-upgrade)
+
+<a id="Guibas2022">[Guibas, 2022]</a> 
+John Guibas, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, Bryan Catanzaro, 
+"Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers", 2022, [url](https://arxiv.org/abs/2111.13587)
+
+<a id="Lam2023">[Lam, 2023]</a>
+Remi Lam, Alvaro Sanchez-Gonzalez, Matthew Willson, Peter Wirnsberger, Meire Fortunato, Ferran Alet, Suman Ravuri, Timo Ewalds, Zach Eaton-Rosen, Weihua Hu, Alexander Merose, Stephan Hoyer, George Holland, Oriol Vinyals, Jacklynn Stott, Alexander Pritzel, Shakir Mohamed, and Peter Battaglia, "GraphCast: Learning skillful medium-range global weather forecasting", 2023, [url](https://www.science.org/doi/10.1126/science.adi2336)
+
+<a id="Price2024">[Price, 2024]</a>
+Ilan Price, Alvaro Sanchez-Gonzalez, Ferran Alet, Tom R. Andersson, Andrew El-Kadi, Dominic Masters, Timo Ewalds, Jacklynn Stott, Shakir Mohamed, Peter Battaglia, Remi Lam and Matthew Willson, "GenCast: Diffusion-based ensemble forecasting
+for medium-range weather", 2024, [url](https://arxiv.org/pdf/2312.15796)
