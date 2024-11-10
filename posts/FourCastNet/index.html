@@ -164,10 +164,10 @@ window.Quarto = {
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">AIForScience</div>
-                <div class="quarto-category">NumericalMethods</div>
+                <div class="quarto-category">AI-For-Science</div>
+                <div class="quarto-category">Numerical-Methods</div>
                 <div class="quarto-category">Transformers</div>
-                <div class="quarto-category">Weather</div>
+                <div class="quarto-category">Weather-Forecasting</div>
               </div>
                   </div>
   </div>
@@ -218,7 +218,7 @@ Figure&nbsp;1: Improvements in ECWMF forecast accuracy <a href="#Haiden2021">[Ha
 </div>
 <p>There’s a pretty <strong>remarkable dataset</strong> available in the realm of AI for science: the <a href="https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.4803">ERA5 global reanalysis</a> dataset, which contains <em>hourly</em> estimates of numerous 3D atmospheric, land, and ocean features at a <em>horizontal resolution of 30 km</em> over the past <em>80 years</em>. This dataset was synthesized from up to 25M-per-day measurements from Earth-observing satellites and weather stations. Can machine learning be used to learn to forecast the weather better, either by more efficiently/effectively solving the weather PDEs or by learning a better model?</p>
 <p>The FourCastNet paper [<a href="#Parthak2022">Pathak, 2022</a>] trains an <strong>Adaptive Fourier Neural Operator</strong> (AFNO) network <a href="#Guibas2022">[Guibas, 2022]</a> to predict a collection of atmospheric variables at the next time step (6 hours into the future) given the current readout for those variables. The AFNO is an interesting choice here: it takes inspiration from both <strong>neural operators</strong>, which are designed to efficiently solve PDEs, and <strong>Vision Transformers</strong> (ViT), which can learn complex functions from large image datasets. We know that weather is well-modeled by PDEs, and the ERA 5 dataset is converted into images where each pixel location corresponds to a <span class="math inline">\(.25^\circ \times .25^\circ\)</span> latitude/longitude region, and each channel corresponds to a different atmospheric variable, so maybe some amalgam of neural operators and transformers makes sense.</p>
-<div id="fig-fourcastnet-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" style="text-align: center;">
+<div id="fig-fourcastnet-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" style="text-align: center;" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-fourcastnet-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="FourCastNetArchitecture.png" class="img-fluid figure-img" width="400">
@@ -235,7 +235,7 @@ Figure&nbsp;2: FourCastNet architecture overview [<a href="#Pathak2022">Pathak, 
 <section id="evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
 <p>Most of the paper is devoted to evaluating the performance of the weather forecasts. They show that their predictions are qualitatively accurate on predicting the formation and trajectory of a cyclone and hurricane and patterns of an atmospheric river within the range of 2-4 days. They quantitatively compare the accuracy of the FourCastNet prediction to the ECMWF’s physics-based Integrated Forecasting System (IFS). Accuracy is worse (with a few exceptions), but comparable. More recent ML-based models, including GraphCast <a href="#Lam2023">[Lam, 2023]</a> and GenCast <a href="#Price2024">[Price, 2024]</a> report performance better than ECMWF’s.</p>
-<div id="fig-storm-forecasts" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" style="text-align: center;">
+<div id="fig-storm-forecasts" class="quarto-float quarto-figure quarto-figure-center anchored" style="text-align: center;" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-storm-forecasts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="StormFormationForecast.png" class="img-fluid figure-img" width="600">
