@@ -13,11 +13,22 @@
 <url>https://janelia-cvml.github.io/blog/cvml-icon-100x100.png</url>
 <title>Janelia CVML</title>
 <link>https://janelia-cvml.github.io/blog/</link>
-<height>100</height>
-<width>100</width>
 </image>
-<generator>quarto-1.5.54</generator>
-<lastBuildDate>Mon, 04 Nov 2024 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.6.33</generator>
+<lastBuildDate>Fri, 08 Nov 2024 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>FourCastNet</title>
+  <dc:creator>Kristin Branson and Magdelena Schneider</dc:creator>
+  <link>https://janelia-cvml.github.io/blog/posts/FourCastNet/</link>
+  <description><![CDATA[ Weather forecasting with Adaptive Fourier Neural Operators ]]></description>
+  <category>AIForScience</category>
+  <category>NumericalMethods</category>
+  <category>Transformers</category>
+  <category>Weather</category>
+  <guid>https://janelia-cvml.github.io/blog/posts/FourCastNet/</guid>
+  <pubDate>Fri, 08 Nov 2024 05:00:00 GMT</pubDate>
+  <media:content url="https://janelia-cvml.github.io/blog/posts/FourCastNet/FourCastNetArchitecture.png" medium="image" type="image/png" height="176" width="144"/>
+</item>
 <item>
   <title>Welcome</title>
   <dc:creator>CVML organizers</dc:creator>
