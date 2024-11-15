@@ -1,12 +1,5 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Computer Vision and Machine Learning at Janelia",
-    "section": "",
-    "text": "Researchers at Janelia have been participating in a weekly journal club on computer vision and machine learning (CVML) since 2014. This blog began in November 2024, and will highlight some of our favorite papers.\nThis awesome logo was created by Diane Adjavon."
-  },
-  {
     "objectID": "posts/FourCastNet/index.html",
     "href": "posts/FourCastNet/index.html",
     "title": "FourCastNet",
@@ -18,7 +11,7 @@
     "href": "posts/FourCastNet/index.html#training",
     "title": "FourCastNet",
     "section": "Training",
-    "text": "Training\nOne of the issues with almost every temporal process is that it has multiple time scales that we want to model. To predict the weather \\(k\\) time points into the future, FourCastNet must be run iteratively \\(k\\) times, and errors can accumulate so that inputs are out-of-domain. So, instead of training on the full temporal resolution of the data, FourCastNet is trained at 6-hour resolution. Possibly badness would happen if it was trained at 1-hour resolution, and then run iteratively \\(6\\cdot k\\) times. Interestingly, they first train on 6-hour predictions, then fine-tune to minimize 12-hour prediction errors when calling the network twice recursively."
+    "text": "Training\nOne of the issues with almost every temporal process is that it has multiple time scales that we want to model. To predict the weather \\(k\\) time points into the future, FourCastNet must be run iteratively \\(k\\) times, and errors can accumulate so that inputs are out-of-domain. So, instead of training on the full temporal resolution of the data, FourCastNet is trained at 6-hour resolution. Probably badness would happen if it was trained at 1-hour resolution, and then run iteratively \\(6\\cdot k\\) times. Interestingly, they first train on 6-hour predictions, then fine-tune to minimize 12-hour prediction errors when calling the network twice recursively."
   },
   {
     "objectID": "posts/FourCastNet/index.html#evaluation",
@@ -32,7 +25,7 @@
     "href": "posts/FourCastNet/index.html#thoughts",
     "title": "FourCastNet",
     "section": "Thoughts",
-    "text": "Thoughts\nOne closing question is how ML solves this problem: Is it learning to model the weather in the same way that the governing physics equations do? Or is it more about learning what initial conditions are similar and memorizing? In some ways, memorization seems like it may be a step backwards—before numerical weather prediction was a thing, meteorologists did something closer to memorization:\n\nRichardson’s book opens with a discussion of then-current practice in the Meteorological Office. He describes the use of an Index of Weather Maps, constructed by classifying old synoptic charts into categories. The Index assisted the forecaster to find previous maps resembling the current one and therewith to deduce the likely development by studying the evolution of these earlier cases. But Richardson was not optimistic about this method. He wrote that “The forecast is based on the supposition that what the atmosphere did then, it will do again now. […] The past history of the atmosphere is used, so to speak, as a full-scale working model of its present self”. […] the Nautical Almanac, that marvel of accurate forecasting, is not based on the principle that astronomical history repeats itself in the aggregate. It would be safe to say that a particular disposition of stars, planets and satellites never occurs twice. Why then should we expect a present weather map to be exactly represented in a catalogue of past weather?\n\n— From [Lynch, 2008]\nThings we are taking away from this paper:\n\nERA5 is a cool dataset!\nIt’s going to allow ML to beat physics at weather forecasting, with lots of caveats about the classical work that goes into assimilating raw observations into these nicely gridded measurements, and probably lots of things we don’t understand about weather. Will there be noticeable improvements to us in our weather forecasts soon??\nThere’s a lot of work to do on the details of what data is used, what is predicted, and how it is evaluated. We were happy to see that the ECMWF now has an experimental AIFS—the Artificial Intelligence/Integrated Forecasting System. They’ve released implementations of several of the SOTA models that you can get with pip install ai-models\nAFNO is an interesting choice because of (a) its connection to PDEs that underly many processes we want to model and (b) computational efficiency."
+    "text": "Thoughts\nOne closing question is how ML solves this problem: Is it learning to model the weather in the same way that the governing physics equations do? Or is it more about learning what initial conditions are similar and memorizing? In some ways, memorization seems like it may be a step backwards—before numerical weather prediction was a thing, meteorologists did something closer to memorization:\n\nRichardson’s book opens with a discussion of then-current practice in the Meteorological Office. He describes the use of an Index of Weather Maps, constructed by classifying old synoptic charts into categories. The Index assisted the forecaster to find previous maps resembling the current one and therewith to deduce the likely development by studying the evolution of these earlier cases. But Richardson was not optimistic about this method. He wrote that “The forecast is based on the supposition that what the atmosphere did then, it will do again now. […] The past history of the atmosphere is used, so to speak, as a full-scale working model of its present self”. […] the Nautical Almanac, that marvel of accurate forecasting, is not based on the principle that astronomical history repeats itself in the aggregate. It would be safe to say that a particular disposition of stars, planets and satellites never occurs twice. Why then should we expect a present weather map to be exactly represented in a catalogue of past weather?\n\n— From [Lynch, 2008]\nThings we are taking away from this paper:\n\nERA 5 is a cool dataset!\nIt’s going to allow ML to beat physics at weather forecasting, with lots of caveats about the classical work that goes into assimilating raw observations into these nicely gridded measurements, and probably lots of things we don’t understand about weather. Will there be noticeable improvements to us in our weather forecasts soon??\nThere’s a lot of work to do on the details of what data is used, what is predicted, and how it is evaluated. We were happy to see that the ECMWF now has an experimental AIFS—the Artificial Intelligence/Integrated Forecasting System. They’ve released implementations of several of the SOTA models that you can get with pip install ai-models\nAFNO is an interesting choice because of (a) its connection to PDEs that underly many processes we want to model and (b) computational efficiency. There are also open-source implementations of AFNO and FourCastNet, and a FourCastNet colab notebook"
   },
   {
     "objectID": "posts/FourCastNet/index.html#about-the-afno",
@@ -46,7 +39,28 @@
     "href": "posts/FourCastNet/index.html#references",
     "title": "FourCastNet",
     "section": "References",
-    "text": "References\n[Pathak, 2022] Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar, “FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators”, 2022, url\n[Lynch, 2008] Peter Lynch, “The origins of computer weather prediction and climate modeling”, 2008, url\n[Charney, 1952] J. G. Charney, R. Fjortoft, & J. Von Neumann, “Numerical integration of the barotropic vorticity equation”, 1952, url\n[Haiden, 2021] T. Haiden, M. Janousek, F. Vitart, Z. Ben Bouallegue, L. Ferranti, F. Prates, and D. Richardson, “Evaluation of ECMWF forecasts, including the 2021 upgrade”, 2021, url\n[Guibas, 2022] John Guibas, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, Bryan Catanzaro, “Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers”, 2022, url\n[Lam, 2023] Remi Lam, Alvaro Sanchez-Gonzalez, Matthew Willson, Peter Wirnsberger, Meire Fortunato, Ferran Alet, Suman Ravuri, Timo Ewalds, Zach Eaton-Rosen, Weihua Hu, Alexander Merose, Stephan Hoyer, George Holland, Oriol Vinyals, Jacklynn Stott, Alexander Pritzel, Shakir Mohamed, and Peter Battaglia, “GraphCast: Learning skillful medium-range global weather forecasting”, 2023, url\n[Price, 2024] Ilan Price, Alvaro Sanchez-Gonzalez, Ferran Alet, Tom R. Andersson, Andrew El-Kadi, Dominic Masters, Timo Ewalds, Jacklynn Stott, Shakir Mohamed, Peter Battaglia, Remi Lam and Matthew Willson, “GenCast: Diffusion-based ensemble forecasting for medium-range weather”, 2024, url"
+    "text": "References\n[Pathak, 2022] Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar, “FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators”, 2022. 🔗\n[Lynch, 2008] Peter Lynch, “The origins of computer weather prediction and climate modeling”, 2008. 🔗\n[Charney, 1952] J. G. Charney, R. Fjortoft, & J. Von Neumann, “Numerical integration of the barotropic vorticity equation”, 1952. 🔗\n[Haiden, 2021] T. Haiden, M. Janousek, F. Vitart, Z. Ben Bouallegue, L. Ferranti, F. Prates, and D. Richardson, “Evaluation of ECMWF forecasts, including the 2021 upgrade”, 2021. 🔗\n[Guibas, 2022] John Guibas, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, Bryan Catanzaro, “Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers”, 2022. 🔗\n[Lam, 2023] Remi Lam, Alvaro Sanchez-Gonzalez, Matthew Willson, Peter Wirnsberger, Meire Fortunato, Ferran Alet, Suman Ravuri, Timo Ewalds, Zach Eaton-Rosen, Weihua Hu, Alexander Merose, Stephan Hoyer, George Holland, Oriol Vinyals, Jacklynn Stott, Alexander Pritzel, Shakir Mohamed, and Peter Battaglia, “GraphCast: Learning skillful medium-range global weather forecasting”, 2023. 🔗\n[Price, 2024] Ilan Price, Alvaro Sanchez-Gonzalez, Ferran Alet, Tom R. Andersson, Andrew El-Kadi, Dominic Masters, Timo Ewalds, Jacklynn Stott, Shakir Mohamed, Peter Battaglia, Remi Lam and Matthew Willson, “GenCast: Diffusion-based ensemble forecasting for medium-range weather”, 2024. 🔗"
+  },
+  {
+    "objectID": "posts/FourCastNet/index.html#resources",
+    "href": "posts/FourCastNet/index.html#resources",
+    "title": "FourCastNet",
+    "section": "Resources",
+    "text": "Resources\n\nERA 5 dataset 🔗\nImplementations of SOTA weather forecasting models from ai-models package 🔗\nAFNO Github repo 🔗\nFourCastNet Github repo 🔗\nFourCastNet Colab notebook 🔗"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Janelia CVML",
+    "section": "",
+    "text": "FourCastNet\n\n\n\n\n\n\nAIForScience\n\n\nNumericalMethods\n\n\nTransformers\n\n\nNeuralOperators\n\n\nWeather\n\n\nForecasting\n\n\n\nWeather forecasting with Adaptive Fourier Neural Operators\n\n\n\n\n\nNov 8, 2024\n\n\nKristin Branson and Magdalena Schneider\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome\n\n\n\n\n\n\n\n\n\n\n\nNov 4, 2024\n\n\nCVML organizers\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Computer Vision and Machine Learning at Janelia",
+    "section": "",
+    "text": "Researchers at Janelia have been participating in a weekly journal club on computer vision and machine learning (CVML) since 2014. This blog began in November 2024, and will highlight some of our favorite papers.\nThis awesome logo was created by Diane Adjavon."
   },
   {
     "objectID": "posts/2024-11-04-welcome.html",
@@ -61,12 +75,5 @@
     "title": "Welcome",
     "section": "",
     "text": "This page will highlight some papers recommended by Janelia’s computer vision and machine learning researchers."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Janelia CVML",
-    "section": "",
-    "text": "FourCastNet\n\n\n\n\n\n\nAIForScience\n\n\nNumericalMethods\n\n\nTransformers\n\n\nNeuralOperators\n\n\nWeather\n\n\n\nWeather forecasting with Adaptive Fourier Neural Operators\n\n\n\n\n\nNov 8, 2024\n\n\nKristin Branson and Magdelena Schneider\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome\n\n\n\n\n\n\n\n\n\n\n\nNov 4, 2024\n\n\nCVML organizers\n\n\n\n\n\n\nNo matching items"
   }
 ]
