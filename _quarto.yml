@@ -3,10 +3,10 @@ project:
 
 website:
   title: "Janelia CVML"
-  image: cvml-icon-100x100.png
+  image: cvml_300x110.png
   favicon: favicon.ico
   navbar:
-    logo: cvml-icon-100x100.png
+    logo: cvml_300x110.png
     left:
       - href: about.qmd
         text: About
