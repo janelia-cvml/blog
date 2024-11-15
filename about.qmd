@@ -7,5 +7,11 @@ format:
     code-tools: false
 ---
 
+::: {style="width: 220; float: left; margin-right: 1em;"}
+![](cvml_900x330.png){width=330}
+:::
+
 Researchers at Janelia have been participating in a weekly journal club on computer vision and machine learning (CVML) since 2014. This
-page will highlight some of our favorite papers.
+blog began in November 2024, and will highlight some of our favorite papers.
+
+This awesome logo was created by [Diane Adjavon](https://github.com/adjavon).
