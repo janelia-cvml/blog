@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://janelia-cvml.github.io/blog/posts/FourCastNet/index.html</loc>
-    <lastmod>2024-11-11T13:00:12.419Z</lastmod>
-  </url>
-  <url>
-    <loc>https://janelia-cvml.github.io/blog/index.html</loc>
-    <lastmod>2024-11-09T03:26:42.933Z</lastmod>
-  </url>
-  <url>
     <loc>https://janelia-cvml.github.io/blog/about.html</loc>
-    <lastmod>2024-11-09T03:26:42.913Z</lastmod>
+    <lastmod>2024-11-15T02:48:16.205Z</lastmod>
+  </url>
+  <url>
+    <loc>https://janelia-cvml.github.io/blog/posts/FourCastNet/index.html</loc>
+    <lastmod>2024-11-15T02:26:43.458Z</lastmod>
   </url>
   <url>
     <loc>https://janelia-cvml.github.io/blog/posts/2024-11-04-welcome.html</loc>
-    <lastmod>2024-11-09T03:26:42.943Z</lastmod>
+    <lastmod>2024-11-04T18:25:08.113Z</lastmod>
+  </url>
+  <url>
+    <loc>https://janelia-cvml.github.io/blog/index.html</loc>
+    <lastmod>2024-11-04T18:11:48.940Z</lastmod>
   </url>
 </urlset>
