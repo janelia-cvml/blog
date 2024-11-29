@@ -10,6 +10,9 @@ image: ""  # Optional
 
 *Neural Operators and Fourier Neural Operator papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01, Adaptive Fourier Neural Operator and FourCastNet papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08*
 
+Neural operators are a generalization of neural networks to continuous domains, i.e. they learn mappings from a function to a function. A major advantage of neural operators is their discretization invariance, which allows for zero-shot super resolution, meaning that the output can be evaluated at an arbitrary set of query points without the need to retrain the neural operator. Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks. In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.
+
+
 ## Brief introduction to PDEs
 
 Partial differential equations (PDEs) are the main mathematical tool to model and simulate complex real-world phenomena.
