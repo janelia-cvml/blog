@@ -180,15 +180,18 @@ Comparison of the fundamental solution and the learned kernel for the Poisson eq
 
 
 
-### Train a neural operator on Darcy flow yourself
+### Darcy flow---train a simple neural operator yourself
 Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium.
 It is given by
 $$
 -\nabla \cdot (a(x) \nabla u(x)) = f(x),
 $$
-where $u(x)$ is the pressure, $a(x)$ is the permeability, and $f(x)$ is a source term.
+where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term.
 The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
 
+@fig-darcy-flow-dataset shows an illustrative training dataset for the Darcy flow problem including the input function, output function and positional embedding.
+@fig-darcy-flow-prediction shows the prediction of the trained neural operator for three different input functions $a(x)$ and ground truth for comparison.
+The shown examples were reproduced by code provided by the authors (see [resources](#References) for links). 
 
 Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally.
 The Incremental Fourier Neural Operator (iFNO) was introduced in [George, 2022](#George2022).
@@ -199,41 +202,36 @@ The Incremental Fourier Neural Operator (iFNO) was introduced in [George, 2022](
 
 ![](darcy-flow-prediction.png){#fig-darcy-flow-prediction}
 
-Darcy flow dataset and prediction.
+Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained neural operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison.
 :::
 
 
 
-### Solve inverse problemes much faster than classical methods
-Baysian inverse problem:
-Recover initial condition or coefficient functions from noisy observations
+### Inverse problemes---solve them much faster than classical methods
+Neural operators can also be applied to efficiently solve Baysian inverse problems, where the goal is to recover the initial condition or coefficient functions of a PDE from noisy observations.
 
-Computation time
-Classical method: 18h
-FNO: 2.5min (+ once: 12h training)
+@fig-inverse-problem (left column) shows the initial condition at timepoint $t=0$ and the corresponding state at timepoint $t=50$.
+The goal is to recover the initial condition from the state at timepoint $t=50$ which is affected by noise.
 
-::: {#fig-inverse-problem style="width: 500px; margin: auto; text-align: center;"}
-![](baysian-inverse-problem.png){width=500px}
+For solving the inverse problem for a single state, a classical method based on finite element methods took 18 hours to compute the solution [[Kovachki, 2021](#Kovachki2021)].
 
-Solving an inverse problem with classical methods and Fourier Neural Operators.
+Meanwhile, a Fourier Neural Operator (FNO) for solving the inverse problem can be trained on training data pairs obtained by forward simulation. After training of the neural operator, which took 12 hours, solving the inverse problem for each new single state takes only 2.5 minutes, making this approach much more efficient than classical methods.
+
+::: {#fig-inverse-problem style="width: 650px; margin: auto; text-align: center;"}
+![](baysian-inverse-problem.png){width=650px}
+
+Solving an inverse problem with classical methods and Fourier Neural Operator. Left column: Ground truth initial condition at timepoint $t=0$ (top) and the corresponding state at timepoint $t=50$ (bottom). Middle column: Recovered initial condition from the ground truth at timepoint $t=50$ using a classical method (top) and the correponding state at $t=50$ (bottom) for comparison. Right column: Recovered initial condition from the ground truth at timepoint $t=50$ using a Fourier Neural Operator (top) and the corresponding state at $t=50$ (bottom) for comparison.
 :::
 
 
 
 ## Applications in computer vision
 
-Real-world applications: weather forecasting (see other blog), CO2 storage (cite paper)
+Neural operators have been successfully applied to real-world problems, including weather forecasting [[Pathak, 2022]](#Pathak2022) (see also our blog post on [FourCastNet](../FourCastNet/index.qmd)) and CO2 storage [[Wen, 2023]](#Wen2023).
 
-Operator learning is not restricted to PDEs
-
-images can naturally be viewed as real-valued function on 2D domains
-videos add a temporal structure
-
-Examples:
-Chi et al., Fast Fourier Convolution, 2020
-Chu et al., Rethinking Fast Fourier Convolution in Image Inpainting, 2023
-Wei et al., Super-Resolution Neural Operator, 2023
-Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neural Operator
+Moreover, neural operator learning is not restricted to PDEs, but can also be applied to computer vision tasks: 
+images can naturally be viewed as real-valued function on 2D domains, and videos add a temporal structure.
+Examples of computer vision tasks that have been successfully tackled with neural operators include image inpainting, super-resolution, and image segmentation [add citations: Chi, Chu, Wei, Wong].
 
 
 ## Appendix: Brief introduction to PDEs {#sec-appendix}
@@ -329,6 +327,26 @@ Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bha
 
 <a id="Li2020">[Li, 2020]</a> 
 Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Fourier Neural Operator for Parametric Partial Differential Equations", 2020. [:link:](https://doi.org/10.48550/arXiv.2010.08895)
+
+<a id="Pathak2022">[Pathak, 2022]</a> 
+Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar, "FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators", 2022. [:link:](https://arxiv.org/pdf/2202.11214)
+
+<a id="Guibas2022">[Guibas, 2022]</a> 
+John Guibas, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, Bryan Catanzaro, 
+"Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers", 2022. [:link:](https://arxiv.org/abs/2111.13587)
+
+<a id="Wen2023">[Wen, 2023]</a> 
+Gege Wen, Zongyi Li, Qirui Long, Kamyar Azizzadenesheli, Anima Anandkumar and Sally M. Benson, "Real-time high-resolution CO2 geological storage prediction using nested Fourier neural operators", 2023. [:link:](https://doi.org/10.48550/arXiv.2210.17051)
+
+
+Chi et al., Fast Fourier Convolution, 2020
+
+Chu et al., Rethinking Fast Fourier Convolution in Image Inpainting, 2023
+
+Wei et al., Super-Resolution Neural Operator, 2023
+
+Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neural Operator
+
 
 ## Resources
 * Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
