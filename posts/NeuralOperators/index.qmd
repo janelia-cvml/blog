@@ -12,6 +12,81 @@ image: ""  # Optional
 
 ## Brief introduction to PDEs
 
+Partial differential equations (PDEs) are the main mathematical tool to model and simulate complex real-world phenomena.
+A PDE describes how a function $u \colon D \to \mathbb{R}$ on some domain $D \subset \mathbb{R}^d$ (this could be heat in a mechanical element, pressure in the atmosphere, etc.) behaves.
+In a very general form, a PDE can be written as
+$$\begin{align}
+\mathsf{L}_a u = f \qquad &\text{in } D,\\
+u = 0 \qquad &\text{on } \partial D,
+\end{align}$$
+where $\mathsf{L}_a$ is a (in general nonlinear) differential operator with some parameters $a \colon D \to \mathbb{R}^m$, $f$ is a source term, and $u$ is the solution to the PDE.
+Formally, we require that $a$ is in some function space $\mathcal{A}$ and $u$ is in some function space $\mathcal{U}$.
+This implies that $f \in \mathcal{U}^*$, which is the dual space of $\mathcal{U}$, and $\mathsf{L} \colon \mathcal{A} \times \mathcal{U} \to \mathcal{U}^*$.
+
+Traditionally, the types of questions we ask about PDEs are:
+
+- Given a PDE and a fixed set of parameters $a$, what is the solution $u$ for a given source term $f$, i.e., what is the inverse of $\mathsf{L}_a \colon \mathcal{U} \to \mathcal{U}^*$?
+- Given a PDE and a fixed source term $f$, what is the solution $u$ for a given set of parameters $a$, i.e., what is the inverse of $\mathsf{L}_{(\cdot)}f \colon \mathcal{A} \to \mathcal{U}^*$?
+- Given a PDE and a fixed solution $u$, what are the parameters $a$ or the source term $f$ that generated this solution, i.e., solving an *inverse problem*?
+
+To make this abstract setting more concrete, we'll consider some examples in the following sections.
+
+
+### Example: Darcy flow
+
+Consider the Darcy flow equation, which describes the flow of a fluid (e.g., water) through a two dimensional porous medium (e.g., sand) in $D = [0, 1]^2$:
+$$\begin{align}
+-\nabla \cdot (a \nabla u) &= f \qquad \text{in } D,\\
+u &= 0 \qquad \text{on } \partial D,
+\end{align}$$
+where $u$ is the pressure of a fluid in a porous medium, $a$ is the local permeability of the medium, and $f$ is an external source of pressure.
+In this example, $\mathcal{A} = L^\infty(D; \mathbb{R}_+)$, and $\mathcal{U} = H^1_0(D)$.
+
+Possible questions to ask about this PDE are:
+
+- Given a fixed distribution of sand $a$, what is the pressure of the water $u$ given some external source of pressure $f$?
+- Given a fixed external source of pressure $f$, what is the pressure of the water $u$ given some distribution of sand $a$?
+- Given a fixed external source of pressure $f$ and a known pressure distribution $u$, what is the distribution of sand $a$ that generated this pressure distribution?
+
+
+### Example: time dependent heat equation
+
+Consider the one dimensional time dependent heat equation, which describes the evolution of the temperature $u$ in a unit-length rod up to time $T$:
+$$\begin{align}
+\partial_t u - \Delta u &= f \qquad \text{in } (0, 1) \times (0, T),\\
+u &= 0 \qquad \text{on } \{0, 1\} \times (0, T),\\
+u &= a \qquad \text{at } t = 0,
+\end{align}$$
+where $a$ is the initial temperature of the rod and $f$ is an external source of heat.
+In this example, the domain $D$ is the space-time cylinder $(0, 1) \times (0, T)$, $\mathcal{A} = L^\infty((0, 1); \mathbb{R}_+)$, and $\mathcal{U} = L^2((0, T); H^1_0((0,1); \mathbb{R}))$.
+
+Possible questions to ask about this PDE are:
+
+- Given a fixed initial temperature $a$, what is the temperature distribution $u$ at time $T$ given some external heating $f$?
+- Given a fixed external heating $f$, what is the temperature distribution $u$ at time $T$ given some initial temperature $a$?
+- Given a fixed external heating $f$ and a known temperature distribution $u$, what is the initial temperature $a$ that generated this temperature distribution?
+- Given a fixed initial temperature $a$ and a known temperature distribution $u$, what is the external heating $f$ that generated this temperature distribution?
+
+
+### Classical answers to PDE questions
+
+Traditionally, the answers to the questions above are obtained by solving the PDE with classical numerical methods, such as finite differences, finite elements, or spectral methods; see, e.g., [Bartels, 2018](#Bartels2018).
+All of these methods require knowledge of the PDE that models the physical phenomenon of interest, and they take significant resources to implement and compute the solution.
+
+In a small set of cases, however, a given PDE might be solved analytically.
+In general, this applies to linear PDEs with constant coefficients and simple geometries.
+For example, the heat equation above can be solved analytically for all given $a$ and $f$, while the Darcy flow equation cannot.
+In such a case, one can find a so-called fundamental solution $k$ to the PDE, which is a solution to the PDE with a Dirac delta source term:
+$$\begin{align}
+\mathsf{L}_a k(\cdot, y) = \delta_y \qquad &\text{in } D,\\
+k = 0 \qquad &\text{on } \partial D,
+\end{align}$$
+for all $y \in D$, where $\delta_y$ is the Dirac delta distribution centered at $y$.
+
+Given such a fundamental solution, one can express the solution $u$ to the PDE by convolving the source term $f$ with the fundamental solution:
+$$u(x) = \int_D k(x, y) f(y) \, dy.$$
+While we, again, stress that such a representation of the solution is only possible for a small set of very specific PDEs, it will serve as the basis for neural operators in the following sections.
+
 
 ## What are Neural Operators?
 
@@ -24,5 +99,10 @@ image: ""  # Optional
 
 ## References
 
+<a id="Bartels2018">[Bartels, 2018]</a> 
+Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+
 
 ## Resources
+
+- [Darcy flow using fourier neural operators](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
