@@ -10,6 +10,17 @@ image: ""  # Optional
 
 *Neural Operators and Fourier Neural Operator papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01, Adaptive Fourier Neural Operator and FourCastNet papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08*
 
+## Brief introduction to PDEs
+
+
+## What are Neural Operators?
+
+
+## Different ways to represent the kernel
+
+
+## Hands-on examples
+
 
 ## References
 
