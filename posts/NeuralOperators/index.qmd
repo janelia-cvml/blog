@@ -90,6 +90,48 @@ While we, again, stress that such a representation of the solution is only possi
 
 ## What are Neural Operators?
 
+Conventional neural networks have finite-dimensional inputs and outputs, which are represented as vectors. However, many real-world problems are continuous in nature and better represented by a function. Neural operators are a generalization of neural networks that can learn to map functions to functions. They can be used to solve PDEs, inverse problems, and other tasks that involve continuous functions. Neural operators can also be applied to learn mappings between neural representations, as neural representations are function representations.
+
+::: {#fig-neural-operator style="width: 700px; margin: auto; text-align: center;"}
+![](neural-operator.png){width=700px}
+
+Principle of neural operators: An input function $a$ is mapped to an output function $u$.
+:::
+
+### General architecture
+Simply said, neural operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains. While CNNs feature convolutions with small kernels on discrete grids, neural operators have a continuous kernel that is convolved with the whole function in each layer.
+The general architecture of a neural operator is shown in @fig-no-architecture.
+The input function $a(x)$ is represented by a set of query points and corresponding function values. First, $a(x)$ is lifted into a (usually higher-dimensional) space by $P$. Then, the lifted function is processed by a series of layers, each of which applies a continuous kernel to the function. The resulting function is added to a linear term $W$ and then passed through a non-linear activation function. Finally, the output function is projected to the output space by the projection $Q$, yielding the output function $u(x)$.
+Note that the output function can be queried at any point in the domain, which is a key feature of neural operators. The query points of $u(x)$ are supplied together with the input function, as they need to pass through the whole network. Importantly, the query points do not have to be the same as the sampling points of the input function, or the query points used for training of the neural operator, which allows for "zero-shot super resolution".
+
+::: {#fig-no-architecture style="width: 700px; margin: auto; text-align: center;"}
+![](no-architecture.png){width=700px}
+
+General architecture of a neural operator. The input function $a(x)$ is lifted into a (higher-dimensional) space by $P$, processed by several neural operator layers, and projected to the output space by $Q,$ yielding the output function $u(x)$. Figure adapted from [Kovachki, 2021](#Kovachki2021).
+:::
+
+
+### Discretization and invariance
+
+Although neural operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e. represented by a set of query points and corresponding function values. While, in principle, the query points can be arbitrary, in practice, they are often chosen to be equidistantly spaced on a grid for computationl efficiency.
+Hence, the learned operator is an approximation to to the true operator $\hat{G}$, operating on
+$$
+\hat{G} \colon \mathbb{R}^{L_d} \to \mathbb{R}^{L_m} \rightarrow \mathcal{U},
+$$
+where $L_d$ is the number of query points of the input function, $L_m$ is the number of query points of the output function, and $\mathcal{U}$ is the function space of the output function.
+The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. This allows for "zero-shot super resolution", i.e. the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
+
+Note that same other papers have claimed that neural operators are not necessarily discretization invariant (e.g. [Golland, 2023](#Golland2023)), but this is a topic of ongoing research.
+
+
+::: {#fig-discretiation-invariance style="width: 500px; margin: auto; text-align: center;"}
+![](discretization-invariance.png){width=500px}
+
+Neural operators are discretization invariant. The output can be evaluated at an arbitrary set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. Figure adapted from [Kovachki, 2021](#Kovachki2021).
+:::
+
+
+
 
 ## Different ways to represent the kernel
 
@@ -116,7 +158,7 @@ $$
 Note that a fundamental solution does not exist for every PDE---only a subset of linear PDEs with appropriate boundary conditions have one.
 A full neural operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either. This simple example of a Poisson equation was trained with a single layer, so the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth. Fig. ? shows both the analytic fundamental solution and the learned kernel. Of note, they are not exactly the same, but qualitatively similar.
 
-::: {#fig-poisson-equation style="width: 500px; margin-right: 1em;"}
+::: {#fig-poisson-equation style="width: 500px; margin: auto; text-align: center;"}
 ![](poisson-equation.png){width=500px}
 
 Comparison of the fundamental solution and the learned kernel for the Poisson equation.
@@ -134,7 +176,7 @@ where $u(x)$ is the pressure, $a(x)$ is the permeability, and $f(x)$ is a source
 
 Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally. The Incremental Fourier Neural Operator (iFNO) was introduced in  [[George, 2022]](#George2022).
 
-::: {#fig-darcy-flow layout-ncol=2}
+::: {#fig-darcy-flow layout-ncol=2 style="width: 600px; margin: auto; text-align: center;"}
 
 ![](darcy-flow-dataset.png){#fig-darcy-flow-dataset}
 
@@ -153,7 +195,7 @@ Computation time
 Classical method: 18h
 FNO: 2.5min (+ once: 12h training)
 
-::: {#fig-inverse-problem style="width: 500px; margin-right: 1em;"}
+::: {#fig-inverse-problem style="width: 500px; margin: auto; text-align: center;"}
 ![](baysian-inverse-problem.png){width=500px}
 
 Solving an inverse problem with classical methods and Fourier Neural Operators.
