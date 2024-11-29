@@ -135,6 +135,49 @@ Neural operators are discretization invariant. The output can be evaluated at an
 
 ## Different ways to represent the kernel
 
+The bottleneck of neural operators is the convolution operation, the cost of which scales with the product of input and output size.
+Assuming that input and output are of the same size $J$, the complexity of the convolution is $\mathcal{O}(J^2)$, which is infeasible for most applications.
+There are multiple ways to speed up the computation of the convolution based on the structure of the kernel.
+
+### Graph Neural Operators
+
+![Kernel representation of a GNO (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-gno.png){#fig-kernel-gno width=400px fig-align="left"}
+
+Instead of taking into account the full space of pairs of input and output sample points, we can limit the evaluation of the kernel to pairs of points that are close.
+In practice, this can be done by constructing a graph that connects points that are within a certain distance of each other by using a nearest neighbor search.
+It is then advantageous to use graph neural networks to compute the convolution operation on this graph structure and to be able to backpropagate easily through this operation.
+This reduces the complexity to $\mathcal{O}(kJ)$, where $k$ is the maximal number of neighbors within a specified distance.
+
+### Multipole Graph Neural Operators
+
+![Multi-level graph used in MGNOs (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-mgno.png){#fig-kernel-gno width=400px fig-align="left"}
+
+Graph neural operators only take nearest neighbor interactions into account.
+While this might be sufficient for some applications, long-range interactions also play a crucial role in many real-world problems (e.g., celestial mechanics, or electrodynamics).
+Drawing from ideas of the fast multipole method (FMM) [[Greengard and Rokhlin, 1987]](#FMM), multi-level neural operators use a hierarchical sequence of graphs to approximate the convolution operation.
+Every node in one of these graphs summarizes the information of a group of nodes in the previous hierarchy level, and every level of the hierarchy gives rise to a certain scale dependent component of the kernel.
+While the details are complex, the idea is similar to enlarging the context window of a CNN by using a sequence of convolutional layers with small kernel sizes.
+This reduces the complexity to $\mathcal{O}(J)$.
+
+### Low-rank Neural Operators
+
+![Kernel representation of a LNO (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-lno.png){#fig-kernel-gno width=400px fig-align="left"}
+
+By assuming that the kernel can be approximated by a low-rank matrix,
+$$k(x, y) \approx \sum_{i=1}^r \varphi_i(x) \varphi_i(y),$$
+with learnable functions $\varphi_i \colon D \to \mathbb{R}$, and $r \ll J$, the convolution operation can be computed in $\mathcal{O}(rJ)$.
+
+### Fourier Neural Operators
+
+![Kernel representation of a FNO (adapted from [[Li, 2020]](#Li2020))](kernel-fno.png){#fig-kernel-gno width=400px fig-align="left"}
+
+Fourier neural operators are based on the Fourier representation of the convolution operation:
+$$\int_D k(x, y) v(y) \, dy = \mathcal{F}^{-1}(\mathcal{F}(k) \odot \mathcal{F}(v)),$$
+where $\mathcal{F}$ is the Fourier transform, and $\odot$ denotes the element-wise product.
+In practice, this seems to give the best results and can be combined with low-pass filtering to reduce the computational cost even further.
+While computing the Fourier transform scales quadratically with the input size, the fast Fourier transform (FFT) can be used to compute it in almost linear time if the input grid is uniform.
+In this case, the complexity of the convolution operation is $\mathcal{O}(J \log J)$.
+
 
 ## Hands-on examples
 
@@ -229,6 +272,9 @@ Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bha
 ## Resources
 <a id="Bartels2018">[Bartels, 2018]</a> 
 Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+
+<a id="FMM">[Greengard and Rokhlin, 1987]</a> 
+Leslie Greengard and Vladimir Rokhlin, "A fast algorithm for particle simulations", 1987. [:link:](https://www.sciencedirect.com/science/article/pii/0021999187901409)
 
 <a id="Li2020">[Li, 2020]</a> 
 Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Fourier Neural Operator for Parametric Partial Differential Equations", 2020. [:link:](https://doi.org/10.48550/arXiv.2010.08895)
