@@ -96,13 +96,106 @@ While we, again, stress that such a representation of the solution is only possi
 
 ## Hands-on examples
 
+[Kovachki, 2021](#Kovachki2021) provides various examples of solving PDEs with neural opartors. We picked three examples here that (i) compare the performance of neural operators to the analytic solution, (ii) show a simple example that you can train yourself with code provided by the authors, and (iii) demonstrate how neural operators can solve inverse problems much faster than classical methods. 
+
+### Poisson equation --- comparison to ground truth
+The Poisson equation is a fairly simple PDE that has an analytical solution. We can use this to check how well the neural operator approximates the ground truth.
+The Poisson equation is given by
+$$
+-\frac{\partial^2 u}{\partial x^2} = f(x), \quad x \in (0, 1),
+$$
+with boundary conditions $u(0) = u(1) = 0$.
+The fundamental solution is given by
+$$
+G(x, y) = \frac{1}{2}(x+y - |y-x|) - xy,
+$$
+so the solution for any $f$ is given by
+$$
+u(x) = \int_0^1 G(x, y) f(y) dy.
+$$
+Note that a fundamental solution does not exist for every PDE---only a subset of linear PDEs with appropriate boundary conditions have one.
+A full neural operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either. This simple example of a Poisson equation was trained with a single layer, so the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth. Fig. ? shows both the analytic fundamental solution and the learned kernel. Of note, they are not exactly the same, but qualitatively similar.
+
+::: {#fig-poisson-equation style="width: 500px; margin-right: 1em;"}
+![](poisson-equation.png){width=500px}
+
+Comparison of the fundamental solution and the learned kernel for the Poisson equation.
+:::
+
+
+
+### Train a neural operator on Darcy flow yourself
+Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium. It is given by
+$$
+-\nabla \cdot (a(x) \nabla u(x)) = f(x),
+$$
+where $u(x)$ is the pressure, $a(x)$ is the permeability, and $f(x)$ is a source term. The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
+
+
+Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally. The Incremental Fourier Neural Operator (iFNO) was introduced in  [[George, 2022]](#George2022).
+
+::: {#fig-darcy-flow layout-ncol=2}
+
+![](darcy-flow-dataset.png){#fig-darcy-flow-dataset}
+
+![](darcy-flow-prediction.png){#fig-darcy-flow-prediction}
+
+Darcy flow dataset and prediction.
+:::
+
+
+
+### Solve inverse problemes much faster than classical methods
+Baysian inverse problem:
+Recover initial condition or coefficient functions from noisy observations
+
+Computation time
+Classical method: 18h
+FNO: 2.5min (+ once: 12h training)
+
+::: {#fig-inverse-problem style="width: 500px; margin-right: 1em;"}
+![](baysian-inverse-problem.png){width=500px}
+
+Solving an inverse problem with classical methods and Fourier Neural Operators.
+:::
+
+
+
+## Applications in computer vision
+
+Real-world applications: weather forecasting (see other blog), CO2 storage (cite paper)
+
+Operator learning is not restricted to PDEs
+
+images can naturally be viewed as real-valued function on 2D domains
+videos add a temporal structure
+
+Examples:
+Chi et al., Fast Fourier Convolution, 2020
+Chu et al., Rethinking Fast Fourier Convolution in Image Inpainting, 2023
+Wei et al., Super-Resolution Neural Operator, 2023
+Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neural Operator
+
+
+
 
 ## References
-
-<a id="Bartels2018">[Bartels, 2018]</a> 
-Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+<a id="Kovachki2021">[Kovachki, 2021]</a> 
+Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Neural Operator: Learning Maps Between Function Spaces", 2021. [:link:](https://doi.org/10.48550/arXiv.2108.08481)
 
 
 ## Resources
+<a id="Bartels2018">[Bartels, 2018]</a> 
+Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
 
-- [Darcy flow using fourier neural operators](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
+<a id="Li2020">[Li, 2020]</a> 
+Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Fourier Neural Operator for Parametric Partial Differential Equations", 2020. [:link:](https://doi.org/10.48550/arXiv.2010.08895)
+
+<a id="George2022">[George, 2022]</a> 
+Robert Joseph George, Jiawei Zhao, Jean Kossaifi, Zongyi Li and Anima Anandkumar , "Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs", 2022. [:link:](https://doi.org/10.48550/arXiv.2211.15188)
+
+## Resources
+* Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
+* Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
+* Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)
+* Train incremental Darcy Flow example with PyTorch [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py)
