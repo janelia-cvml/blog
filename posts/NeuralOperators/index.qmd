@@ -99,7 +99,7 @@ Principle of neural operators: An input function $a$ is mapped to an output func
 :::
 
 ### General architecture
-Simply said, neural operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains. While CNNs feature convolutions with small kernels on discrete grids, neural operators have a continuous kernel that is convolved with the whole function in each layer.
+Put simply, neural operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains. While CNNs feature convolutions with small kernels on discrete grids, neural operators have a continuous kernel that is convolved with the whole function in each layer.
 The general architecture of a neural operator is shown in @fig-no-architecture.
 The input function $a(x)$ is represented by a set of query points and corresponding function values. First, $a(x)$ is lifted into a (usually higher-dimensional) space by $P$. Then, the lifted function is processed by a series of layers, each of which applies a continuous kernel to the function. The resulting function is added to a linear term $W$ and then passed through a non-linear activation function. Finally, the output function is projected to the output space by the projection $Q$, yielding the output function $u(x)$.
 Note that the output function can be queried at any point in the domain, which is a key feature of neural operators. The query points of $u(x)$ are supplied together with the input function, as they need to pass through the whole network. Importantly, the query points do not have to be the same as the sampling points of the input function, or the query points used for training of the neural operator, which allows for "zero-shot super resolution".
@@ -113,15 +113,15 @@ General architecture of a neural operator. The input function $a(x)$ is lifted i
 
 ### Discretization and invariance
 
-Although neural operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e. represented by a set of query points and corresponding function values. While, in principle, the query points can be arbitrary, in practice, they are often chosen to be equidistantly spaced on a grid for computationl efficiency.
-Hence, the learned operator is an approximation to to the true operator $\widehat{G}$, operating on
+Although neural operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values. While, in principle, the query points can be arbitrary, in practice they are often chosen to be equidistantly spaced on a grid for computational efficiency.
+Hence, the learned operator is an approximation to the true operator $\widehat{G}$, operating on
 $$
 \widehat{G} \colon \mathbb{R}^{L \cdot m} \to \mathbb{R}^{L \cdot d} \rightarrow \mathcal{U},
 $$
 where $L$ is the number of query points of the input function, $d$ and $m$ are the dimensions of input function and coefficients, respectively, and $\mathcal{U}$ is the function space of the output function.
-The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. This allows for "zero-shot super resolution", i.e. the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
+The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. This allows for "zero-shot super resolution", i.e., the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
 
-Note that same other papers have claimed that neural operators are not necessarily discretization invariant (e.g. [Golland, 2023](#Golland2023)), but this is a topic of ongoing research.
+Note that some other papers have claimed that neural operators are not necessarily discretization invariant (e.g. [Golland, 2023](#Golland2023)), but this is a topic of ongoing research.
 
 
 ::: {#fig-discretiation-invariance style="width: 500px; margin: auto; text-align: center;"}
@@ -218,7 +218,7 @@ $$
 u(x) = \int_0^1 G(x, y) f(y) dy.
 $$
 Note that a fundamental solution does not exist for every PDE---only a subset of linear PDEs with appropriate boundary conditions have one.
-A full neural operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either. This simple example of a Poisson equation was trained with a single layer, so the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth. Fig. ? shows both the analytic fundamental solution and the learned kernel. Of note, they are not exactly the same, but qualitatively similar.
+A full neural operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either. This simple example of a Poisson equation was trained with a single layer, so the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth. @fig-poisson-equation shows both the analytic fundamental solution and the learned kernel. Of note, they are not exactly the same, but qualitatively similar.
 
 ::: {#fig-poisson-equation style="width: 500px; margin: auto; text-align: center;"}
 ![](poisson-equation.png){width=500px}
@@ -284,20 +284,20 @@ Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neur
 
 
 ## References
-<a id="Kovachki2021">[Kovachki, 2021]</a> 
-Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Neural Operator: Learning Maps Between Function Spaces", 2021. [:link:](https://doi.org/10.48550/arXiv.2108.08481)
-
 <a id="Bartels2018">[Bartels, 2018]</a> 
 Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+
+<a id="George2022">[George, 2022]</a> 
+Robert Joseph George, Jiawei Zhao, Jean Kossaifi, Zongyi Li and Anima Anandkumar , "Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs", 2022. [:link:](https://doi.org/10.48550/arXiv.2211.15188)
 
 <a id="FMM">[Greengard and Rokhlin, 1987]</a> 
 Leslie Greengard and Vladimir Rokhlin, "A fast algorithm for particle simulations", 1987. [:link:](https://www.sciencedirect.com/science/article/pii/0021999187901409)
 
+<a id="Kovachki2021">[Kovachki, 2021]</a> 
+Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Neural Operator: Learning Maps Between Function Spaces", 2021. [:link:](https://doi.org/10.48550/arXiv.2108.08481)
+
 <a id="Li2020">[Li, 2020]</a> 
 Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Fourier Neural Operator for Parametric Partial Differential Equations", 2020. [:link:](https://doi.org/10.48550/arXiv.2010.08895)
-
-<a id="George2022">[George, 2022]</a> 
-Robert Joseph George, Jiawei Zhao, Jean Kossaifi, Zongyi Li and Anima Anandkumar , "Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs", 2022. [:link:](https://doi.org/10.48550/arXiv.2211.15188)
 
 ## Resources
 * Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
