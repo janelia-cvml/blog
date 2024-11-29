@@ -66,7 +66,7 @@ where $L$ is the number of query points of the input function, $d$ and $m$ are t
 The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training.
 This allows for "zero-shot super resolution", i.e., the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
 
-Note that some other papers have claimed that neural operators are not necessarily discretization invariant (e.g., [Golland, 2023](#Golland2023)), but this is a topic of ongoing research.
+Note that some other papers have claimed that neural operators are not necessarily discretization invariant (e.g., [Wang, 2023](#Wang2023)), but this is a topic of ongoing research.
 
 
 ::: {#fig-discretiation-invariance style="width: 500px; margin: auto; text-align: center;"}
@@ -231,7 +231,7 @@ Neural operators have been successfully applied to real-world problems, includin
 
 Moreover, neural operator learning is not restricted to PDEs, but can also be applied to computer vision tasks: 
 images can naturally be viewed as real-valued function on 2D domains, and videos add a temporal structure.
-Examples of computer vision tasks that have been successfully tackled with neural operators include image inpainting, super-resolution, and image segmentation [add citations: Chi, Chu, Wei, Wong].
+Examples of computer vision tasks that have been successfully tackled with neural operators include image inpainting, super-resolution, and image segmentation [[Chi, 2020]](#Chi2020), [[Guibas, 2022]](#Guibas2022), [[Wei, 2023]](#Wei2023), [[Wong, 2023]](#Wong2023).
 
 
 ## Appendix: Brief introduction to PDEs {#sec-appendix}
@@ -314,38 +314,68 @@ While we, again, stress that such a representation of the solution is only possi
 
 ## References
 <a id="Bartels2018">[Bartels, 2018]</a> 
-Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+Sören Bartels,
+"Numerical Approximation of Partial Differential Equations", 2018.
+[:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
+
+<a id="Chi2020">[Chi, 2020]</a>
+Lu Chi, Borui Jiang and Yadong Mu,
+"Fast Fourier Convolution", 2020.
+[:link:](https://proceedings.neurips.cc/paper/2020/file/2fd5d41ec6cfab47e32164d5624269b1-Paper.pdf)
+
+<a id="Chu2023">[Chu, 2023]</a>
+Tianyi Chu, Jiafu Chen, Jiakai Sun, Shuobin Lian, Zhizhong Wang, Zhiwen Zuo, Lei Zhao, Wei Xing and Dongming Lu,
+"Rethinking Fast Fourier Convolution in Image Inpainting", 2023.
 
 <a id="George2022">[George, 2022]</a> 
-Robert Joseph George, Jiawei Zhao, Jean Kossaifi, Zongyi Li and Anima Anandkumar , "Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs", 2022. [:link:](https://doi.org/10.48550/arXiv.2211.15188)
+Robert Joseph George, Jiawei Zhao, Jean Kossaifi, Zongyi Li and Anima Anandkumar,
+"Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs", 2022.
+[:link:](https://doi.org/10.48550/arXiv.2211.15188)
 
 <a id="FMM">[Greengard and Rokhlin, 1987]</a> 
-Leslie Greengard and Vladimir Rokhlin, "A fast algorithm for particle simulations", 1987. [:link:](https://www.sciencedirect.com/science/article/pii/0021999187901409)
-
-<a id="Kovachki2021">[Kovachki, 2021]</a> 
-Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Neural Operator: Learning Maps Between Function Spaces", 2021. [:link:](https://doi.org/10.48550/arXiv.2108.08481)
-
-<a id="Li2020">[Li, 2020]</a> 
-Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Fourier Neural Operator for Parametric Partial Differential Equations", 2020. [:link:](https://doi.org/10.48550/arXiv.2010.08895)
-
-<a id="Pathak2022">[Pathak, 2022]</a> 
-Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar, "FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators", 2022. [:link:](https://arxiv.org/pdf/2202.11214)
+Leslie Greengard and Vladimir Rokhlin,
+"A fast algorithm for particle simulations", 1987.
+[:link:](https://www.sciencedirect.com/science/article/pii/0021999187901409)
 
 <a id="Guibas2022">[Guibas, 2022]</a> 
 John Guibas, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, Bryan Catanzaro, 
-"Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers", 2022. [:link:](https://arxiv.org/abs/2111.13587)
+"Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers", 2022.
+[:link:](https://arxiv.org/abs/2111.13587)
+
+<a id="Kovachki2021">[Kovachki, 2021]</a> 
+Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar,
+"Neural Operator: Learning Maps Between Function Spaces", 2021.
+[:link:](https://doi.org/10.48550/arXiv.2108.08481)
+
+<a id="Li2020">[Li, 2020]</a> 
+Zongyi Li, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar,
+"Fourier Neural Operator for Parametric Partial Differential Equations", 2020.
+[:link:](https://doi.org/10.48550/arXiv.2010.08895)
+
+<a id="Pathak2022">[Pathak, 2022]</a> 
+Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and Animashree Anandkumar,
+"FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators", 2022.
+[:link:](https://arxiv.org/pdf/2202.11214)
+
+<a id="Wei2023">[Wei, 2023]</a>
+Min Wei and Xuesong Zhang,
+"Super-Resolution Neural Operator", 2023.
+[:link:](https://arxiv.org/abs/2303.02584)
 
 <a id="Wen2023">[Wen, 2023]</a> 
-Gege Wen, Zongyi Li, Qirui Long, Kamyar Azizzadenesheli, Anima Anandkumar and Sally M. Benson, "Real-time high-resolution CO2 geological storage prediction using nested Fourier neural operators", 2023. [:link:](https://doi.org/10.48550/arXiv.2210.17051)
+Gege Wen, Zongyi Li, Qirui Long, Kamyar Azizzadenesheli, Anima Anandkumar and Sally M. Benson,
+"Real-time high-resolution CO2 geological storage prediction using nested Fourier neural operators", 2023.
+[:link:](https://doi.org/10.48550/arXiv.2210.17051)
 
+<a id="Wong2023">[Wong, 2023]</a>
+Ken C. L. Wong, Hongzhi Wang and Tanveer Syeda-Mahmood,
+"FNOSeg3D: Resolution-Robust 3D Image Segmentation with Fourier Neural Operator", 2023.
+[:link:](http://dx.doi.org/10.1109/ISBI53787.2023.10230586)
 
-Chi et al., Fast Fourier Convolution, 2020
-
-Chu et al., Rethinking Fast Fourier Convolution in Image Inpainting, 2023
-
-Wei et al., Super-Resolution Neural Operator, 2023
-
-Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neural Operator
+<a id="Wang2023">[Wang, 2023]</a>
+Clinton J. Wang and Polina Golland,
+"Discretization Invariant Networks for Learning Maps between Neural Fields", 2023.
+[:link:](https://arxiv.org/abs/2206.01178)
 
 
 ## Resources
