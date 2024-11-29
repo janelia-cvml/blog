@@ -114,11 +114,11 @@ General architecture of a neural operator. The input function $a(x)$ is lifted i
 ### Discretization and invariance
 
 Although neural operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e. represented by a set of query points and corresponding function values. While, in principle, the query points can be arbitrary, in practice, they are often chosen to be equidistantly spaced on a grid for computationl efficiency.
-Hence, the learned operator is an approximation to to the true operator $\hat{G}$, operating on
+Hence, the learned operator is an approximation to to the true operator $\widehat{G}$, operating on
 $$
-\hat{G} \colon \mathbb{R}^{L_d} \to \mathbb{R}^{L_m} \rightarrow \mathcal{U},
+\widehat{G} \colon \mathbb{R}^{L \cdot m} \to \mathbb{R}^{L \cdot d} \rightarrow \mathcal{U},
 $$
-where $L_d$ is the number of query points of the input function, $L_m$ is the number of query points of the output function, and $\mathcal{U}$ is the function space of the output function.
+where $L$ is the number of query points of the input function, $d$ and $m$ are the dimensions of input function and coefficients, respectively, and $\mathcal{U}$ is the function space of the output function.
 The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. This allows for "zero-shot super resolution", i.e. the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
 
 Note that same other papers have claimed that neural operators are not necessarily discretization invariant (e.g. [Golland, 2023](#Golland2023)), but this is a topic of ongoing research.
@@ -141,35 +141,48 @@ There are multiple ways to speed up the computation of the convolution based on 
 
 ### Graph Neural Operators
 
-![Kernel representation of a GNO (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-gno.png){#fig-kernel-gno width=400px fig-align="left"}
-
 Instead of taking into account the full space of pairs of input and output sample points, we can limit the evaluation of the kernel to pairs of points that are close.
 In practice, this can be done by constructing a graph that connects points that are within a certain distance of each other by using a nearest neighbor search.
 It is then advantageous to use graph neural networks to compute the convolution operation on this graph structure and to be able to backpropagate easily through this operation.
 This reduces the complexity to $\mathcal{O}(kJ)$, where $k$ is the maximal number of neighbors within a specified distance.
 
-### Multipole Graph Neural Operators
+::: {#fig-kernel-gno style="width: 400px; margin: auto; text-align: center;"}
+![](kernel-gno.png){}
 
-![Multi-level graph used in MGNOs (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-mgno.png){#fig-kernel-gno width=400px fig-align="left"}
+Kernel representation of a GNO (adapted from [Kovachki, 2021](#Kovachki2021))
+:::
+
+
+### Multipole Graph Neural Operators
 
 Graph neural operators only take nearest neighbor interactions into account.
 While this might be sufficient for some applications, long-range interactions also play a crucial role in many real-world problems (e.g., celestial mechanics, or electrodynamics).
-Drawing from ideas of the fast multipole method (FMM) [[Greengard and Rokhlin, 1987]](#FMM), multi-level neural operators use a hierarchical sequence of graphs to approximate the convolution operation.
+Drawing from ideas of the fast multipole method (FMM) presented in [Greengard and Rokhlin, 1987](#FMM), multi-level neural operators use a hierarchical sequence of graphs to approximate the convolution operation.
 Every node in one of these graphs summarizes the information of a group of nodes in the previous hierarchy level, and every level of the hierarchy gives rise to a certain scale dependent component of the kernel.
 While the details are complex, the idea is similar to enlarging the context window of a CNN by using a sequence of convolutional layers with small kernel sizes.
 This reduces the complexity to $\mathcal{O}(J)$.
 
-### Low-rank Neural Operators
+::: {#fig-kernel-mgno style="width: 250px; margin: auto; text-align: center;"}
+![](kernel-mgno.png){}
 
-![Kernel representation of a LNO (adapted from [[Kovachki, 2021]](#Kovachki2021))](kernel-lno.png){#fig-kernel-gno width=400px fig-align="left"}
+Multi-level graph used in MGNOs (adapted from [Kovachki, 2021](#Kovachki2021))
+:::
+
+
+### Low-rank Neural Operators
 
 By assuming that the kernel can be approximated by a low-rank matrix,
 $$k(x, y) \approx \sum_{i=1}^r \varphi_i(x) \varphi_i(y),$$
 with learnable functions $\varphi_i \colon D \to \mathbb{R}$, and $r \ll J$, the convolution operation can be computed in $\mathcal{O}(rJ)$.
 
-### Fourier Neural Operators
+::: {#fig-kernel-lno style="width: 400px; margin: auto; text-align: center;"}
+![](kernel-lno.png){}
 
-![Kernel representation of a FNO (adapted from [[Li, 2020]](#Li2020))](kernel-fno.png){#fig-kernel-gno width=400px fig-align="left"}
+Kernel representation of a LNO (adapted from [Kovachki, 2021](#Kovachki2021))
+:::
+
+
+### Fourier Neural Operators
 
 Fourier neural operators are based on the Fourier representation of the convolution operation:
 $$\int_D k(x, y) v(y) \, dy = \mathcal{F}^{-1}(\mathcal{F}(k) \odot \mathcal{F}(v)),$$
@@ -177,6 +190,12 @@ where $\mathcal{F}$ is the Fourier transform, and $\odot$ denotes the element-wi
 In practice, this seems to give the best results and can be combined with low-pass filtering to reduce the computational cost even further.
 While computing the Fourier transform scales quadratically with the input size, the fast Fourier transform (FFT) can be used to compute it in almost linear time if the input grid is uniform.
 In this case, the complexity of the convolution operation is $\mathcal{O}(J \log J)$.
+
+::: {#fig-kernel-lno style="width: 400px; margin: auto; text-align: center;"}
+![](kernel-fno.png){}
+
+Kernel representation of a FNO (adapted from [Li, 2020](#Li2020))
+:::
 
 
 ## Hands-on examples
@@ -217,7 +236,7 @@ $$
 where $u(x)$ is the pressure, $a(x)$ is the permeability, and $f(x)$ is a source term. The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
 
 
-Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally. The Incremental Fourier Neural Operator (iFNO) was introduced in  [[George, 2022]](#George2022).
+Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally. The Incremental Fourier Neural Operator (iFNO) was introduced in [George, 2022](#George2022).
 
 ::: {#fig-darcy-flow layout-ncol=2 style="width: 600px; margin: auto; text-align: center;"}
 
@@ -268,8 +287,6 @@ Wong et al., FNOSeg3D: Resolution-robust 3D image segmentation with Fourier Neur
 <a id="Kovachki2021">[Kovachki, 2021]</a> 
 Nikola B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart and Anima Anandkumar, "Neural Operator: Learning Maps Between Function Spaces", 2021. [:link:](https://doi.org/10.48550/arXiv.2108.08481)
 
-
-## Resources
 <a id="Bartels2018">[Bartels, 2018]</a> 
 Sören Bartels, "Numerical Approximation of Partial Differential Equations", 2018. [:link:](https://link.springer.com/book/10.1007/978-3-319-32354-1)
 
