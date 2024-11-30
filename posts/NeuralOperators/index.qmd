@@ -135,7 +135,7 @@ Multi-level graph used in MGNOs (adapted from @Kovachki2021)
 By assuming that the kernel can be approximated by a low-rank factorization,
 $$k(x, y) \approx \sum_{i=1}^r \varphi_i(x) \varphi_i(y),$$
 with learnable functions $\varphi_i \colon D \to \mathbb{R}$, and $r \ll L$, the convolution operation can be computed in $\mathcal{O}(rL)$.
-While this can significantly reduce the computational cost, it is important to note that the low-rank assumption might not hold for all problems and that the choice of low-rank approximation (i.e. the functions $\varphi$) can be crucial but non-trivial.
+While this can significantly reduce the computational cost, it is important to note that the low-rank assumption might not hold for all problems and that the choice of low-rank approximation (i.e., the functions $\varphi$) can be crucial but non-trivial.
 
 ::: {#fig-kernel-lno style="width: 400px; margin: auto; text-align: center;"}
 ![](kernel-lno.png){}
@@ -228,14 +228,15 @@ Darcy flow dataset and prediction. (a) Illustrative training dataset for the Dar
 
 ### Inverse problems: solve them much faster than classical methods
 Neural Operators can also be applied to efficiently solve Bayesian inverse problems, where the goal is to recover the initial condition or coefficient functions of a PDE from noisy observations.
-
+Here, we look at a simulation of a two-dimensional viscous, incompressible fluid flow governed by the Navier--Stokes equations in their vorticity-streamfunction formulation.
+We'll skip the details of the PDE and just note the general setup: 
 @fig-inverse-problem (left column) shows the initial condition at timepoint $t=0$ and the corresponding state at timepoint $t=50$.
 The goal is to recover the initial condition from sampling the state at timepoint $t=50$ which is affected by noise.
 
-For solving the inverse problem for a single state, a classical method (middle column) based on finite element methods took 18 hours to compute the solution [@Kovachki2021].
+For solving the inverse problem for a single state, a classical method (middle column) based on spectral methods took 18 hours to compute the solution [@Kovachki2021].
 
-Meanwhile, a Fourier Neural Operator (FNO) for solving the inverse problem can be trained on training data pairs obtained by forward simulation.
-After training of the Neural Operator, which took 12 hours (including generation of training data by classical methods), solving the inverse problem for each new single state takes only 2.5 minutes (right column), making this approach much more efficient than classical methods.
+Meanwhile, a Fourier Neural Operator (FNO) for solving the inverse problem can be trained on training data pairs obtained by forward simulation using classical methods.
+After training of the Neural Operator, which took 12 hours (including generation of training data), solving the inverse problem for each new single state takes only 2.5 minutes (right column), making this approach much more efficient than solving the whole inverse problem with classical methods.
 
 ::: {#fig-inverse-problem style="width: 650px; margin: auto; text-align: center;"}
 ![](baysian-inverse-problem.png){width=650px}
