@@ -1,17 +1,17 @@
 ---
 title: "Neural Operators"
 from: markdown+emoji
-description: "An Introduction to Neural Operators"
+description: "An Introduction to Neural Networks on Continuous Domains"
 author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
 categories: [AIForScience, Partial Differential Equations, Numerical Methods, NeuralOperators]
 image: ""  # Optional
 ---
 
-*Neural Operators and Fourier Neural Operator papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01, Adaptive Fourier Neural Operator and FourCastNet papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08*
+*Neural Operators [[Kovachki, 2021]](#Kovachki2021) and Fourier Neural Operator [[Li, 2020]](#Li2020) papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01 (and discussed in this blog post), Adaptive Fourier Neural Operator [[Guibas, 2022]](#Guibas2022) and FourCastNet [[Pathak, 2022]](#Pathak2022) papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08 (see blog post on [FourCastNet](../FourCastNet/index.qmd))*
 
-Neural operators are a generalization of neural networks to continuous domains, i.e., they learn mappings functions to functions.
-A major advantage of neural operators is their discretization invariance, which allows for zero-shot super resolution, meaning that the output can be evaluated at an arbitrary set of query points without the need to retrain the neural operator.
+Neural Operators are a generalization of neural networks to continuous domains, i.e., they learn to map functions to other functions.
+A major advantage of neural operators is their (presumed) discretization invariance, which allows for zero-shot super resolution, meaning that the output function can be evaluated at an arbitrary set of query points without the need to retrain the neural operator.
 Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks.
 In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.
 
@@ -22,7 +22,7 @@ We assume that you are familiar with the very basics of Partial Differential Equ
 
 Conventional neural networks have finite-dimensional inputs and outputs, which are represented as vectors.
 However, many real-world problems are continuous in nature and better represented by a function.
-Neural operators are a generalization of neural networks that can learn to map functions to functions.
+Neural Operators are a generalization of neural networks that can learn to map functions to functions.
 They can be used to solve PDEs, inverse problems, and other tasks that involve finding continuous functions.
 Neural operators can also be applied to learn mappings between neural representations, as neural representations are function representations.
 
@@ -32,35 +32,40 @@ Neural operators can also be applied to learn mappings between neural representa
 Principle of neural operators: An input function $a$ is mapped to an output function $u$.
 :::
 
-The main motivation behind neural operators is that some linear PDEs of the form $\mathsf{L}_a u = f$ with parameter functions $a \colon D \to \mathbb{R}^m$ in some domain $D \subset \mathbb{R}^d$ can be solved by convolution with a fundamental solution $k$ of the PDE:
-$$u(x) = \int_D k(x, y) f(y) \, dy.$$ {#eq-fundamental-solution}
+### Motivation
+The main motivation behind Neural Operators is that some linear PDEs of the form $\mathsf{L}_a u = f$ with parameter functions $a \colon D \to \mathbb{R}^m$ in some domain $D \subset \mathbb{R}^d$ and source term $f$ can be solved by convolution with a fundamental solution $k$ of the PDE.
+Note that either the source term $f$ or the parameter function $a$ can be fixed, and the other is the input to the solution operator which gives us $u$.
+If we want to find the solution for varying $f$, the solution operator $G \colon f \mapsto u$ mapping a given source term $f$ to the solution $u$ is given by
+$$
+u(x) = \int_D k(x, y) f(y) \, dy.
+$$ {#eq-fundamental-solution}
 While this is only possible for a small set of very specific PDEs, this representation of the solution serves as a basic building block for neural operators, on top of which a deep learning architecture is built.
 We stress that @eq-fundamental-solution is only a motivation and not a theoretical justification for why neural operators work.
 In particular, neural operators can be applied to a much wider range of problems such as non-linear PDEs and inverse problems; in particular, in the following, we consider the case where the source term $f$ is fixed and the Neural Operator learns to map a parameter function $a$ to the solution $u$.
 
 
 ### General architecture
-Put simply, neural operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains.
+Put simply, Neural Operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains.
 While CNNs feature convolutions with small kernels on regular discrete grids, neural operators have a continuous kernel that is convolved with the whole function in each layer.
-The general architecture of a neural operator is shown in @fig-no-architecture.
-The input function $a$ (usually represented by a set of query points and corresponding function---see below) is lifted into a (usually higher-dimensional) space by $P$.
+The general architecture of a Neural Operator is shown in @fig-no-architecture.
+The input function $a$ (usually represented by a set of query points and corresponding function values---see @sec-discretization-invariance) is lifted into a (usually higher-dimensional) space by $P$.
 Then, the lifted function is processed by a series of layers, each of which applies a convolution with a continuous kernel to the function.
-The resulting function is added to a linear term $W a$ and then passed through a non-linear activation function; this is akin to a skip connection in a CNN.
+The resulting function is added to a linear term $W v$ and then passed through a non-linear activation function; note that this is akin to a skip connection in a CNN.
 Finally, the result of this computation is projected to the output space by the projection $Q$, yielding the output function $u$.
-Note that the output function can be queried at any point in the domain, which is a key feature of neural operators.
+Note that the output function can be queried at any point in the domain, which is a key feature of Neural Operators.
 
 ::: {#fig-no-architecture style="width: 700px; margin: auto; text-align: center;"}
 ![](no-architecture.png){width=700px}
 
-General architecture of a neural operator.
-The input function $a(x)$ is lifted into a (higher-dimensional) space by $P$, processed by several neural operator layers, and projected to the output space by $Q,$ yielding the output function $u(x)$.
+General architecture of a Neural Operator.
+The input function $a(x)$ is lifted into a (higher-dimensional) space by $P$, processed by several Neural Operator layers, and projected to the output space by $Q,$ yielding the output function $u(x)$.
 Figure adapted from [Kovachki, 2021](#Kovachki2021).
 :::
 
 
-### Discretization and invariance
+### Discretization and invariance{#sec-discretization-invariance}
 
-Although neural operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
+Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
 The query points of $u(x)$ are supplied together with the input function, as they need to pass through the whole network.
 While, in principle, the query points can be arbitrary, in practice they are often chosen to be equidistantly spaced on a grid for computational efficiency.
 Hence, the true learned operator $\widehat{G} \colon a \mapsto u$ (operating on functions) is approximated by the discretized operator $\widehat{G}_L$, operating on
@@ -68,18 +73,18 @@ $$
 \widehat{G}_L \colon \mathbb{R}^{L \cdot m} \times \mathbb{R}^{L \cdot d} \rightarrow \mathcal{U},
 $$
 where $L$ is the number of query points of the input function, $d$ and $m$ are the dimensions of the domain $D$ and the image of the input function, respectively, and $\mathcal{U}$ is the function space of the output function.
-The output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training.
+Notably, the output function $u(x)$ can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training.
 This allows for "zero-shot super resolution", i.e., the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.
 
 Discretization invariance refers to the fact that $\widehat{G}_L$ converges to $\widehat{G}$ as $L \to \infty$ (under some mild conditions to the distribution of the query points).
-We stress again that increasing $L$ does not require retraining the neural operator.
-Note that some other papers have claimed that neural operators are not necessarily discretization invariant (e.g., [Wang, 2023](#Wang2023)); this is a topic of ongoing research.
+Again, increasing $L$ does not require retraining the Neural Operator.
+Note that some other papers have claimed that Neural Operators are not necessarily discretization invariant (e.g., [Wang, 2023](#Wang2023)); this is a topic of ongoing research.
 
 
 ::: {#fig-discretiation-invariance style="width: 500px; margin: auto; text-align: center;"}
 ![](discretization-invariance.png){width=500px}
 
-Neural operators are discretization invariant.
+Neural Operators are discretization invariant.
 The output can be evaluated at an arbitrary set of query points, which do not have to be the same as the query points of the input function, or the query points used for training.
 Figure adapted from [Kovachki, 2021](#Kovachki2021).
 :::
@@ -89,17 +94,17 @@ Figure adapted from [Kovachki, 2021](#Kovachki2021).
 
 ## Different ways to represent the kernel
 
-The bottleneck of neural operators is the convolution operation, the cost of which scales with the product of input and output size.
+The bottleneck of Neural Operators is the convolution operation, the cost of which scales with the product of input and output size.
 Assuming that input and output are queried at the same $L$ points, the complexity of the convolution is $\mathcal{O}(L^2)$, which is infeasible for most applications.
-There are multiple ways to speed up the computation of the convolution based on the structure of the kernel.
+Fortunately, there are multiple ways to speed up the computation of the convolution based on the structure of the kernel, which we will shortly describe in the following (for details see [Kovachki, 2021](#Kovachki2021)).
 
 ### Graph Neural Operators
 
-Instead of taking into account the full space of pairs of sample points, we can limit the evaluation of the kernel to pairs of points that are close.
+Instead of taking into account the full space of pairs of sample points, we can limit the evaluation of the kernel to pairs of points that are close to each other.
 In practice, this can be done by constructing a graph that connects points that are within a certain distance of each other by using a nearest neighbor search.
-It is then advantageous to use graph neural networks to compute the convolution operation on this graph structure and to be able to backpropagate easily through this operation.
+It is then advantageous to use graph neural networks to compute the convolution operation on this graph structure, and to be able to backpropagate easily through this operation.
 This reduces the complexity to $\mathcal{O}(kL)$, where $k$ is the maximal number of neighbors within a specified distance.
-Note that $k$ can, in general, not be chosen independently of $L$ as $L$ increases.
+Note that $k$ can, in general, not be chosen independently of $L$ (the number of query points of the input function) as $L$ increases.
 
 ::: {#fig-kernel-gno style="width: 400px; margin: auto; text-align: center;"}
 ![](kernel-gno.png){}
@@ -110,10 +115,10 @@ Kernel representation of a GNO (adapted from [Kovachki, 2021](#Kovachki2021))
 
 ### Multipole Graph Neural Operators
 
-Graph neural operators only take nearest neighbor interactions into account.
+Graph Neural Operators only take nearest neighbor interactions into account.
 While this might be sufficient for some applications, long-range interactions also play a crucial role in many real-world problems (e.g., celestial mechanics, or electrodynamics).
-Drawing from ideas of the fast multipole method (FMM) presented in [Greengard and Rokhlin, 1987](#FMM), Multipole Graph Neural Operators use a hierarchical sequence of graphs to approximate the convolution operation.
-Every node in one of these graphs summarizes the information of a group of nodes in the previous hierarchy level as shown in @fig-kernel-mgno, and every level of the hierarchy gives rise to a certain scale dependent component of the kernel.
+Drawing from ideas of the fast multipole method (FMM) presented in [Greengard and Rokhlin, 1987](#FMM), Multipole Graph Neural Operators (MGNOs) use a hierarchical sequence of graphs to approximate the convolution operation.
+Every node in one of these graphs summarizes the information of a group of nodes in the previous hierarchy level as shown in @fig-kernel-mgno, and every level of the hierarchy gives rise to a certain scale-dependent component of the kernel.
 While the details are complex, the idea is similar to enlarging the context window of a CNN by using a sequence of convolutional layers with small kernel sizes.
 This reduces the complexity to $\mathcal{O}(L)$.
 
@@ -129,7 +134,7 @@ Multi-level graph used in MGNOs (adapted from [Kovachki, 2021](#Kovachki2021))
 By assuming that the kernel can be approximated by a low-rank factorization,
 $$k(x, y) \approx \sum_{i=1}^r \varphi_i(x) \varphi_i(y),$$
 with learnable functions $\varphi_i \colon D \to \mathbb{R}$, and $r \ll L$, the convolution operation can be computed in $\mathcal{O}(rL)$.
-While this can significantly reduce the computational cost, it is important to note that the low-rank assumption might not hold for all problems and that the choice of low-rank approximation can be crucial but non-trivial.
+While this can significantly reduce the computational cost, it is important to note that the low-rank assumption might not hold for all problems and that the choice of low-rank approximation (i.e. the functions $\varphi$) can be crucial but non-trivial.
 
 ::: {#fig-kernel-lno style="width: 400px; margin: auto; text-align: center;"}
 ![](kernel-lno.png){}
@@ -140,12 +145,12 @@ Kernel representation of a LNO (adapted from [Kovachki, 2021](#Kovachki2021))
 
 ### Fourier Neural Operators
 
-Fourier neural operators are based on the Fourier representation of the convolution operation:
+Fourier Neural Operators (FNOs) are based on the Fourier representation of the convolution operation:
 $$\int_D k(x, y) v(y) \, dy = \mathcal{F}^{-1}(\mathcal{F}(k) \odot \mathcal{F}(v)),$$
-where $\mathcal{F}$ is the Fourier transform, and $\odot$ denotes the element-wise vector product.
+where $\mathcal{F}$ is the Fourier transform, and $\odot$ denotes the element-wise vector or matrix product.
 In practice, this seems to give the best results and can be combined with low-pass filtering to reduce the computational cost even further; see @fig-kernel-fno, where the Fourier representation $R$ of the kernel is learned and only low frequencies are propagated through the network.
 
-While computing the Fourier transform scales quadratically with the input size, the fast Fourier transform (FFT) can be used to compute it in almost linear time if the input grid is uniform (which by embedding the domain $D$ in a larger domain and extending the input function by zero can be achieved for many applications).
+While, in general, computing the Fourier transform scales quadratically with the input size, the fast Fourier transform (FFT) can be used to compute it in almost linear time if the input grid is uniform on a periodic domain (which by embedding the domain $D$ in a larger domain and extending the input function by zero padding can be achieved for many applications).
 In this case, the complexity of the convolution operation is $\mathcal{O}(L \log L)$.
 
 ::: {#fig-kernel-fno style="width: 400px; margin: auto; text-align: center;"}
@@ -157,16 +162,16 @@ Kernel representation of a FNO (adapted from [Li, 2020](#Li2020))
 
 ## Hands-on examples
 
-[Kovachki, 2021](#Kovachki2021) provides various examples of solving PDEs with neural opartors.
-We picked three examples here that (i) compare the performance of neural operators to the analytic solution, (ii) show a simple example that you can train yourself with code provided by the authors, and (iii) demonstrate how neural operators can solve inverse problems much faster than classical methods. 
+[Kovachki, 2021](#Kovachki2021) provides various examples of solving PDEs with Neural Operators.
+We picked three examples here that (i) compare the performance of neural operators to the analytic solution, (ii) show a simple example that you can train yourself with code provided by the authors, and (iii) demonstrate how Neural Operators can solve inverse problems much faster than classical methods. 
 
-Note that, in order to generate training data, it was necessary to solve the PDE with classical numerical methods, such as finite differences, finite elements, or spectral methods; see, e.g., [Bartels, 2018](#Bartels2018).
-All of these methods require knowledge of the PDE that models the physical phenomenon of interest, and they take significant resources to implement and compute the solution.
-While using data from classical methods to train is one common approach, it is also possible to train neural operators directly from data, which is an active area of research.
+Note that, in order to generate training data, in [Kovachki, 2021](#Kovachki2021) the PDEs were solved with classical numerical methods, such as finite differences, finite elements, or spectral methods; see, e.g., [Bartels, 2018](#Bartels2018).
+Of note, all of these methods require knowledge of the PDE that models the physical phenomenon of interest, and they take significant resources to implement and compute the solution.
+While using data from classical methods to train is one common approach, it is also possible to train neural operators directly from data, which was done, for example, in the FourCastNet paper [[Pathak, 2022]](#Pathak2022), and is an active area of research.
 
 ### Poisson equation --- comparison to ground truth
 The Poisson equation is a fairly simple PDE that has an analytical solution.
-We can use this to check how well the neural operator approximates the ground truth.
+We can use this to check how well the Neural Operator approximates the ground truth.
 The Poisson equation is given by
 $$
 -\frac{\partial^2 u}{\partial x^2} = f(x), \quad x \in (0, 1),
@@ -180,8 +185,8 @@ so the solution for any $f$ is given by
 $$
 u(x) = \int_0^1 k(x, y) f(y) \, dy.
 $$
-Note that a fundamental solution does not exist for every PDE---only a subset of linear PDEs with appropriate boundary conditions have one.
-A full neural operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either.
+Note that---as pointed out previously---a fundamental solution does not exist for every PDE---only a subset of linear PDEs with appropriate boundary conditions have one.
+A full Neural Operator architecture has several layers and thus, we don't usually have a direct representation of the fundamental solution, either.
 This simple example of a Poisson equation was trained with a single layer, no bias and linear skip connection, and identity activation, so that the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth.
 @fig-poisson-equation shows both the analytic fundamental solution and the learned kernel.
 Of note, they are not exactly the same, but qualitatively similar, which gives rise to the good generalization properties when querying the output function at arbitrary points.
@@ -193,7 +198,7 @@ Comparison of the fundamental solution and the learned kernel for the Poisson eq
 :::
 
 
-### Darcy flow---train a simple neural operator yourself
+### Darcy flow---train a simple Neural Operator yourself
 Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand).
 It is given by
 $$
@@ -203,8 +208,8 @@ where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of t
 The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
 
 @fig-darcy-flow-dataset shows an illustrative training dataset for the Darcy flow problem including the input function, output function and positional embedding.
-@fig-darcy-flow-prediction shows the prediction of the trained neural operator for three different input functions $a(x)$ and ground truth for comparison.
-The shown examples were reproduced by code provided by the authors (see [resources](#References) for links). 
+@fig-darcy-flow-prediction shows the prediction of the trained Neural Operator for three different input functions $a(x)$, and ground truth for comparison.
+The shown examples were reproduced by code provided by the authors (see [resources](  #sec-resources) for links). They were trained on a $16 \times 16$ grid, which requires minimal computation, so you can easily train them yourself on a standard cpu.
 
 Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally.
 The Incremental Fourier Neural Operator (iFNO) was introduced in [George, 2022](#George2022).
@@ -215,21 +220,21 @@ The Incremental Fourier Neural Operator (iFNO) was introduced in [George, 2022](
 
 ![](darcy-flow-prediction.png){#fig-darcy-flow-prediction}
 
-Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained neural operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison.
+Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison.
 :::
 
 
 
-### Inverse problemes---solve them much faster than classical methods
-Neural operators can also be applied to efficiently solve Bayesian inverse problems, where the goal is to recover the initial condition or coefficient functions of a PDE from noisy observations.
+### Inverse problems---solve them much faster than classical methods
+Neural Operators can also be applied to efficiently solve Bayesian inverse problems, where the goal is to recover the initial condition or coefficient functions of a PDE from noisy observations.
 
 @fig-inverse-problem (left column) shows the initial condition at timepoint $t=0$ and the corresponding state at timepoint $t=50$.
 The goal is to recover the initial condition from sampling the state at timepoint $t=50$ which is affected by noise.
 
-For solving the inverse problem for a single state, a classical method based on finite element methods took 18 hours to compute the solution [[Kovachki, 2021](#Kovachki2021)].
+For solving the inverse problem for a single state, a classical method (middle column) based on finite element methods took 18 hours to compute the solution [[Kovachki, 2021](#Kovachki2021)].
 
 Meanwhile, a Fourier Neural Operator (FNO) for solving the inverse problem can be trained on training data pairs obtained by forward simulation.
-After training of the neural operator, which took 12 hours (including generation of training data by classical methods), solving the inverse problem for each new single state takes only 2.5 minutes, making this approach much more efficient than classical methods.
+After training of the Neural Operator, which took 12 hours (including generation of training data by classical methods), solving the inverse problem for each new single state takes only 2.5 minutes (right column), making this approach much more efficient than classical methods.
 
 ::: {#fig-inverse-problem style="width: 650px; margin: auto; text-align: center;"}
 ![](baysian-inverse-problem.png){width=650px}
@@ -244,11 +249,11 @@ Right column: Recovered initial condition from the ground truth at timepoint $t=
 
 ## Applications in computer vision
 
-Neural operators have been successfully applied to real-world problems, including weather forecasting [[Pathak, 2022]](#Pathak2022) (see also our blog post on [FourCastNet](../FourCastNet/index.qmd)) and CO2 storage [[Wen, 2023]](#Wen2023).
+Neural Operators have been successfully applied to real-world problems, including weather forecasting [[Pathak, 2022]](#Pathak2022) (see also our blog post on [FourCastNet](../FourCastNet/index.qmd)) and CO2 storage [[Wen, 2023]](#Wen2023).
 
-Moreover, neural operator learning is not restricted to PDEs, but can also be applied to computer vision tasks: 
+Moreover, Neural Operator learning is not restricted to PDEs, but can also be applied to computer vision tasks: 
 images can naturally be viewed as real-valued function on 2D domains, and videos add a temporal structure.
-Examples of computer vision tasks that have been successfully tackled with neural operators include image inpainting, super-resolution, and image segmentation [[Chi, 2020]](#Chi2020), [[Guibas, 2022]](#Guibas2022), [[Wei, 2023]](#Wei2023), [[Wong, 2023]](#Wong2023).
+Examples of computer vision tasks that have been successfully tackled with Neural Operators include image inpainting, super-resolution, image segmentation and classification [[Chi, 2020]](#Chi2020), [[Guibas, 2022]](#Guibas2022), [[Wei, 2023]](#Wei2023), [[Wong, 2023]](#Wong2023).
 
 
 
@@ -318,7 +323,7 @@ Ken C. L. Wong, Hongzhi Wang and Tanveer Syeda-Mahmood,
 [:link:](http://dx.doi.org/10.1109/ISBI53787.2023.10230586)
 
 
-## Resources
+## Resources{#sec-resources}
 * Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
 * Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
 * Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)
