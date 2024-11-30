@@ -4,7 +4,7 @@ from: markdown+emoji
 description: "An Introduction to Neural Operators"
 author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
-categories: [AIForScience, NumericalMethods, NeuralOperators]
+categories: [AIForScience, Partial Differential Equations, Numerical Methods, NeuralOperators]
 image: ""  # Optional
 ---
 
