@@ -17,7 +17,8 @@ A major advantage of neural operators is their (presumed) discretization invaria
 Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks.
 In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.
 
-We assume that you are familiar with the very basics of Partial Differential Equations (PDEs) and fundamental solutions to PDEs as this is the theoretical foundation of Neural Operators.
+We assume that you are familiar with some fundamental concepts of vector calculus like partial derivatives of multi-variate functions.
+Some background in Partial Differential Equations (PDEs) and fundamental solutions to PDEs would be ideal as this is the theoretical foundation of Neural Operators, but not strictly necessary.
 
 
 ## What are Neural Operators?
@@ -25,7 +26,7 @@ We assume that you are familiar with the very basics of Partial Differential Equ
 Conventional neural networks have finite-dimensional inputs and outputs, which are represented as vectors.
 However, many real-world problems are continuous in nature and better represented by a function.
 Neural Operators are a generalization of neural networks that can learn to map functions to functions.
-They can be used to solve PDEs, inverse problems, and other tasks that involve finding continuous functions.
+They can be used to solve PDEs, inverse problems, and other tasks that involve finding functions defined over continuous domains.
 Neural operators can also be applied to learn mappings between neural representations, as neural representations are function representations.
 
 ::: {#fig-neural-operator style="width: 700px; margin: auto; text-align: center;"}
@@ -44,6 +45,25 @@ $$ {#eq-fundamental-solution}
 While this is only possible for a small set of very specific PDEs, this representation of the solution serves as a basic building block for neural operators, on top of which a deep learning architecture is built.
 We stress that @eq-fundamental-solution is only a motivation and not a theoretical justification for why neural operators work.
 In particular, neural operators can be applied to a much wider range of problems such as non-linear PDEs and inverse problems; in particular, in the following, we consider the case where the source term $f$ is fixed and the Neural Operator learns to map a parameter function $a$ to the solution $u$.
+
+### Illustrative example {#sec-illustrative-example}
+To illustrate the concept of how Neural Operators solve PDEs, we will consider a simple example of a PDE and return to this example throughout the text to explain the different concepts.
+The physical model for the Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand).
+In its two-dimensional form on the unit square $D = [0, 1]^2$, the Darcy flow equation is given by
+$$
+-\nabla \cdot (a(x) \nabla u(x)) = f(x),
+$$
+where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term.
+Without porous medium, fluid flow is given by the pressure gradient $\nabla u$, so $a(x)$ intuitively acts as a local modifier of the driving force behind the flow.
+The quantity $a(x) \nabla u(x)$ is called the flux of the fluid, and the Darcy flow equation states that the sources (which are given by the divergence operator $\nabla \cdot$) of the fluid flux are given by $f$.
+
+Fixing the source term $f(x) = 1$ and the boundary condition $u(x) = 0$ on the boundary $\partial D$, the problem is to find the pressure field $u(x)$ for a given permeability field $a(x)$.
+Pairs of $a(x)$ and $u(x)$ are shown in @fig-darcy-flow, where the input function $a(x)$ is shown on the left as a binary scalar field over the unit square, and the corresponding output function $u(x)$ is shown on the right, having a more intricate structure.
+Note that the images shown in the figure are just *discrete representations* of the functions $a(x)$ and $u(x)$ defined on the whole domain $D$, which are the input and output of the PDE problem (and the Neural Operator).
+
+In the context of Neural Operators, the goal is to learn the inverse $\mathsf{L}_a^{-1}f$, with the differential operator $\mathsf{L}_a = -\nabla \cdot (a(x) \nabla (\cdot))$, which maps the parameter function $a(x)$ to the solution $u(x)$.
+Note that the Darcy flow with a general permeability field $a(x)$ doesn't have an analytically known fundamental solution, and the mapping from $a(x)$ to $u(x)$ is highly non-linear, so that in order to solve the PDE numerical methods are necessary, such as Neural Operators.
+
 
 
 ### General architecture
@@ -67,7 +87,7 @@ Figure adapted from @Kovachki2021.
 
 ### Discretization and invariance{#sec-discretization-invariance}
 
-Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
+Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
 The query points of $u(x)$ are supplied together with the input function, as they need to pass through the whole network.
 While, in principle, the query points can be arbitrary, in practice they are often chosen to be equidistantly spaced on a grid for computational efficiency.
 Hence, the true learned operator $\widehat{G} \colon a \mapsto u$ (operating on functions) is approximated by the discretized operator $\widehat{G}_L$, operating on
@@ -92,6 +112,11 @@ Figure adapted from @Kovachki2021.
 :::
 
 
+In our example of the Darcy flow from @sec-illustrative-example and @fig-darcy-flow, the input function $a(x)$ is discretized on a grid of $L = 16 \times 16 = 256$ query points, resulting in a matrix with $256$ rows of the form $\{x_{i,1}, x_{i,2}, a(x_{i})\}$ being supplied to the Neural Operator.
+Each row is mapped to a positional embedding by the projection $P$, and the results are used as a values $v(y)$ in the convolution operation.
+In order to evaluate the output function $u$ at a point $z \in D$, the query point $z$ is supplied to the Neural Operator together with the input function $a(x)$ in the form above to obtain an output value $u(y)$.
+Since this can be done for any point $z$, the output of the Neural Operator is a proper function (meaning infinite resolution), while the input is still a set of query points and function *values*.
+If more query points are used to evaluate the input function, discretization invariance ensures that the output function becomes more accurate without the need to retrain the Neural Operator, converging to the true solution (where the input is the full function $a$) as the number $L$ of query points goes to infinity.
 
 
 ## Different ways to represent the kernel
@@ -201,14 +226,7 @@ Comparison of the fundamental solution and the learned kernel for the Poisson eq
 
 
 ### Darcy flow: train a simple Neural Operator yourself
-Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand).
-It is given by
-$$
--\nabla \cdot (a(x) \nabla u(x)) = f(x),
-$$
-where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term.
-The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
-
+We again turn to the Darcy flow problem from @sec-illustrative-example.
 @fig-darcy-flow-dataset shows an illustrative training dataset for the Darcy flow problem including the input function, output function and positional embedding.
 @fig-darcy-flow-prediction shows the prediction of the trained Neural Operator for three different input functions $a(x)$, and ground truth for comparison.
 The shown examples were reproduced by code provided by the authors (see [resources](#sec-resources) for links). They were trained on a $16 \times 16$ grid, which requires minimal computation, so you can easily train them yourself on a standard cpu.
