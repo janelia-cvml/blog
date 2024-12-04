@@ -278,6 +278,14 @@ images can naturally be viewed as real-valued function on 2D domains, and videos
 Examples of computer vision tasks that have been successfully tackled with Neural Operators include image inpainting, super-resolution, image segmentation and classification [@Chi2020;@Guibas2022;@Wei2023;@Wong2023].
 
 
+## Key takeaways
+
+* Neural Operators are a cool tool for simulating real-world problems with neural networks, combining concepts from PDE theory and known neural network architectures.
+* The performance gains and trainability from data that Neural Operators promise might help to overcome fundamental problems in biological problems. This could mean a renaissance for simulation-based approaches in biological sciences. While the highest computational effficieny is achieved in somewhat specific settings (e.g., requiring uniform grids), more research is currently being done to extend this efficiency to more general settings.
+* With all the talk about mapping functions to functions, Neural Operators are still working with discrete (though arbitrary) query points. Whether this will be a limitation in the future remains to be seen and more theoretical work is needed to understand Neural Operators better. For example, it is currently being questioned if the concept of discretization invariance holds true in general.
+* The authors provide a codebase for Neural Operators in PyTorch, so they can easily be adopted. Furthermore, there is a growing community around Neural Operators, extending the concepts and implementations to new problems such as computer vision tasks (with close links to transformers).
+
+
 
 ## References
 
