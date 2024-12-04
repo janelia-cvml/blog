@@ -53,16 +53,16 @@ In its two-dimensional form on the unit square $D = [0, 1]^2$, the Darcy flow eq
 $$
 -\nabla \cdot (a(x) \nabla u(x)) = f(x),
 $$
-where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term.
+where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term modeling fluid entering or leaving the system.
 Without porous medium, fluid flow is given by the pressure gradient $\nabla u$, so $a(x)$ intuitively acts as a local modifier of the driving force behind the flow.
 The quantity $a(x) \nabla u(x)$ is called the flux of the fluid, and the Darcy flow equation states that the sources (which are given by the divergence operator $\nabla \cdot$) of the fluid flux are given by $f$.
 
-Fixing the source term $f(x) = 1$ and the boundary condition $u(x) = 0$ on the boundary $\partial D$, the problem is to find the pressure field $u(x)$ for a given permeability field $a(x)$.
+Fixing the source term $f(x) = 1$ and the boundary condition $u(x) = 0$ (meaning that there is no fluid pressure) on the boundary $\partial D$, the problem is to find the pressure field $u(x)$ for a given permeability field $a(x)$.
 Pairs of $a(x)$ and $u(x)$ are shown in @fig-darcy-flow, where the input function $a(x)$ is shown on the left as a binary scalar field over the unit square, and the corresponding output function $u(x)$ is shown on the right, having a more intricate structure.
 Note that the images shown in the figure are just *discrete representations* of the functions $a(x)$ and $u(x)$ defined on the whole domain $D$, which are the input and output of the PDE problem (and the Neural Operator).
 
-In the context of Neural Operators, the goal is to learn the inverse $\mathsf{L}_a^{-1}f$, with the differential operator $\mathsf{L}_a = -\nabla \cdot (a(x) \nabla (\cdot))$, which maps the parameter function $a(x)$ to the solution $u(x)$.
-Note that the Darcy flow with a general permeability field $a(x)$ doesn't have an analytically known fundamental solution, and the mapping from $a(x)$ to $u(x)$ is highly non-linear, so that in order to solve the PDE numerical methods are necessary, such as Neural Operators.
+In the context of Neural Operators, the goal is to learn the inverse $\mathsf{L}_a^{-1}f$ of the differential operator $\mathsf{L}_a = -\nabla \cdot (a(x) \nabla (\cdot))$, which maps the parameter function $a(x)$ to the solution $u(x)$.
+Note that the Darcy flow with a general permeability field $a(x)$ doesn't have an analytically known fundamental solution, and the mapping from $a(x)$ to $u(x)$ is highly non-linear, so that in order to solve the PDE numerical or machine learning methods are necessary, such as Neural Operators.
 
 
 
@@ -113,10 +113,11 @@ Figure adapted from @Kovachki2021.
 
 
 In our example of the Darcy flow from @sec-illustrative-example and @fig-darcy-flow, the input function $a(x)$ is discretized on a grid of $L = 16 \times 16 = 256$ query points, resulting in a matrix with $256$ rows of the form $\{x_{i,1}, x_{i,2}, a(x_{i})\}$ being supplied to the Neural Operator.
-Each row is mapped to a positional embedding by the projection $P$, and the results are used as a values $v(y)$ in the convolution operation.
-In order to evaluate the output function $u$ at a point $z \in D$, the query point $z$ is supplied to the Neural Operator together with the input function $a(x)$ in the form above to obtain an output value $u(y)$.
+Each row is mapped to a positional embedding by the projection $P$, and the results are used as values $v(y)$ in the convolution operation.
+In order to evaluate the output function $u$ at a point $z \in D$, the query point $z$ is supplied to the Neural Operator together with point evaluations of the input function $a(x)$ to obtain an output value $u(y)$.
 Since this can be done for any point $z$, the output of the Neural Operator is a proper function (meaning infinite resolution), while the input is still a set of query points and function *values*.
-If more query points are used to evaluate the input function, discretization invariance ensures that the output function becomes more accurate without the need to retrain the Neural Operator, converging to the true solution (where the input is the full function $a$) as the number $L$ of query points goes to infinity.
+If more sampling points of the input function are supplied, discretization invariance ensures that the output function becomes more accurate, converging to the true solution (where the input is the full function $a$) as the number $L$ of query points goes to infinity.
+Notably, this doesn't require retraining the Neural Operator.
 
 
 ## Different ways to represent the kernel
