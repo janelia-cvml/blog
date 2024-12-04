@@ -1,7 +1,7 @@
 ---
 title: "Neural Operators"
 from: markdown+emoji
-description: "An Introduction to Neural Networks on Continuous Domains"
+description: "An Introduction to Neural Networks Operating on Function Spaces"
 author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
 bibliography: references.bib
@@ -11,7 +11,8 @@ image: ""  # Optional
 
 *Neural Operators [@Kovachki2021] and Fourier Neural Operator [@Li2021] papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01 (and discussed in this blog post), Adaptive Fourier Neural Operator [@Guibas2022] and FourCastNet [@Pathak2022] papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08 (see blog post on [FourCastNet](../FourCastNet/index.qmd))*
 
-Neural Operators are a generalization of neural networks to continuous domains, i.e., they learn to map functions to other functions.
+Neural Operators extend the concept of neural networks to work directly with functions rather than discrete data points.
+While neural networks typically take vectors or tensors as inputs and produce similar outputs, Neural Operators learn mappings between entire functions.
 A major advantage of neural operators is their (presumed) discretization invariance, which allows for zero-shot super resolution, meaning that the output function can be evaluated at an arbitrary set of query points without the need to retrain the neural operator.
 Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks.
 In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.
@@ -60,7 +61,7 @@ Note that the output function can be queried at any point in the domain, which i
 
 General architecture of a Neural Operator.
 The input function $a(x)$ is lifted into a (higher-dimensional) space by $P$, processed by several Neural Operator layers, and projected to the output space by $Q,$ yielding the output function $u(x)$.
-Figure adapted from [Kovachki, 2021](#Kovachki2021).
+Figure adapted from @Kovachki2021.
 :::
 
 
@@ -157,7 +158,7 @@ In this case, the complexity of the convolution operation is $\mathcal{O}(L \log
 ::: {#fig-kernel-fno style="width: 400px; margin: auto; text-align: center;"}
 ![](kernel-fno.png){}
 
-Kernel representation of a FNO (adapted from @Li2020)
+Kernel representation of a FNO (adapted from @Li2021)
 :::
 
 
@@ -195,7 +196,7 @@ Of note, they are not exactly the same, but qualitatively similar, which gives r
 ::: {#fig-poisson-equation style="width: 500px; margin: auto; text-align: center;"}
 ![](poisson-equation.png){width=500px}
 
-Comparison of the fundamental solution and the learned kernel for the Poisson equation.
+Comparison of the fundamental solution and the learned kernel for the Poisson equation (adapted from @Kovachki2021).
 :::
 
 
@@ -221,7 +222,7 @@ The Incremental Fourier Neural Operator (iFNO) was introduced in @George2022.
 
 ![](darcy-flow-prediction.png){#fig-darcy-flow-prediction}
 
-Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison.
+Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison. Figures recreated and adapted from resources [3] and [4].
 :::
 
 
@@ -244,7 +245,7 @@ After training of the Neural Operator, which took 12 hours (including generation
 Solving an inverse problem with classical methods and Fourier Neural Operator.
 Left column: Ground truth initial condition at timepoint $t=0$ (top) and the corresponding state at timepoint $t=50$ (bottom), where the sample points are shown as circles.
 Middle column: Recovered initial condition from the ground truth at timepoint $t=50$ using a classical method (top) and the correponding state at $t=50$ (bottom) for comparison.
-Right column: Recovered initial condition from the ground truth at timepoint $t=50$ using a Fourier Neural Operator (top) and the corresponding state at $t=50$ (bottom) for comparison.
+Right column: Recovered initial condition from the ground truth at timepoint $t=50$ using a Fourier Neural Operator (top) and the corresponding state at $t=50$ (bottom) for comparison. Figure adapted from @Kovachki2021.
 :::
 
 
@@ -266,7 +267,7 @@ Examples of computer vision tasks that have been successfully tackled with Neura
 
 
 ## Resources{#sec-resources}
-* Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
-* Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
-* Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)
-* Train incremental Darcy Flow example with PyTorch [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py)
+[1] Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)\
+[2] Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)\
+[3] Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)\
+[4] Train incremental Darcy Flow example with PyTorch [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py)
