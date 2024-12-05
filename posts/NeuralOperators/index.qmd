@@ -6,7 +6,7 @@ author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
 bibliography: references.bib
 categories: [AIForScience, Partial Differential Equations, Numerical Methods, NeuralOperators]
-image: ""  # Optional
+image: "no-architecture.png"  # Optional
 ---
 
 *Neural Operators [@Kovachki2021] and Fourier Neural Operator [@Li2021] papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01 (and discussed in this blog post), Adaptive Fourier Neural Operator [@Guibas2022] and FourCastNet [@Pathak2022] papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08 (see blog post on [FourCastNet](../FourCastNet/index.qmd))*
