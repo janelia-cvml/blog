@@ -13,9 +13,24 @@
 <url>https://janelia-cvml.github.io/blog/cvml_300x110.png</url>
 <title>Janelia CVML</title>
 <link>https://janelia-cvml.github.io/blog/</link>
+<height>53</height>
+<width>144</width>
 </image>
 <generator>quarto-1.6.33</generator>
-<lastBuildDate>Fri, 08 Nov 2024 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 29 Nov 2024 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Neural Operators</title>
+  <dc:creator>Magdalena Schneider and Michael Innerberger</dc:creator>
+  <link>https://janelia-cvml.github.io/blog/posts/NeuralOperators/</link>
+  <description><![CDATA[ An Introduction to Neural Networks Operating on Function Spaces ]]></description>
+  <category>AIForScience</category>
+  <category>Partial Differential Equations</category>
+  <category>Numerical Methods</category>
+  <category>NeuralOperators</category>
+  <guid>https://janelia-cvml.github.io/blog/posts/NeuralOperators/</guid>
+  <pubDate>Fri, 29 Nov 2024 05:00:00 GMT</pubDate>
+  <media:content url="https://janelia-cvml.github.io/blog/posts/NeuralOperators/no-architecture.png" medium="image" type="image/png" height="61" width="144"/>
+</item>
 <item>
   <title>FourCastNet</title>
   <dc:creator>Kristin Branson and Magdalena Schneider</dc:creator>
@@ -38,6 +53,7 @@
   <description><![CDATA[ This page will highlight some papers recommended by Janelia’s computer vision and machine learning researchers. ]]></description>
   <guid>https://janelia-cvml.github.io/blog/posts/2024-11-04-welcome.html</guid>
   <pubDate>Mon, 04 Nov 2024 05:00:00 GMT</pubDate>
+  <media:content url="https://janelia-cvml.github.io/blog/cvml_900x330.png" medium="image" type="image/png" height="53" width="144"/>
 </item>
 </channel>
 </rss>

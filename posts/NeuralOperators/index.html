@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Magdalena Schneider and Michael Innerberger">
+<meta name="dcterms.date" content="2024-11-29">
+<meta name="description" content="An Introduction to Neural Networks Operating on Function Spaces">
+
+<title>Neural Operators – Janelia CVML</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.ico" rel="icon">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-63335bb52e6afd690ad16d382ee25479.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Neural Operators – Janelia CVML">
+<meta property="og:description" content="An Introduction to Neural Networks Operating on Function Spaces">
+<meta property="og:image" content="https://janelia-cvml.github.io/blog/posts/NeuralOperators/no-architecture.png">
+<meta property="og:site_name" content="Janelia CVML">
+<meta property="og:image:height" content="900">
+<meta property="og:image:width" content="2132">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../cvml_300x110.png" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Janelia CVML</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.janelia.org/our-research/computation-and-theory"> <i class="bi bi-card-text" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Neural Operators</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/janelia-cvml/blog/blob/main/posts/NeuralOperators/index.qmd"><i class="bi"></i> Code</button></div></div>
+                  <div>
+        <div class="description">
+          An Introduction to Neural Networks Operating on Function Spaces
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">AIForScience</div>
+                <div class="quarto-category">Partial Differential Equations</div>
+                <div class="quarto-category">Numerical Methods</div>
+                <div class="quarto-category">NeuralOperators</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Magdalena Schneider and Michael Innerberger </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 29, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p><em>Neural Operators <span class="citation" data-cites="Kovachki2021">(<a href="#ref-Kovachki2021" role="doc-biblioref">Kovachki et al. 2022</a>)</span> and Fourier Neural Operator <span class="citation" data-cites="Li2021">(<a href="#ref-Li2021" role="doc-biblioref">Li et al. 2021</a>)</span> papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01 (and discussed in this blog post), Adaptive Fourier Neural Operator <span class="citation" data-cites="Guibas2022">(<a href="#ref-Guibas2022" role="doc-biblioref">Guibas et al. 2022</a>)</span> and FourCastNet <span class="citation" data-cites="Pathak2022">(<a href="#ref-Pathak2022" role="doc-biblioref">Pathak et al. 2022</a>)</span> papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08 (see blog post on <a href="../../posts/FourCastNet/index.html">FourCastNet</a>)</em></p>
+<p>Neural Operators extend the concept of neural networks to work directly with functions rather than discrete data points. While neural networks typically take vectors or tensors as inputs and produce similar outputs, Neural Operators learn mappings between entire functions. A major advantage of neural operators is their (presumed) discretization invariance, which allows for zero-shot super resolution, meaning that the output function can be evaluated at an arbitrary set of query points without the need to retrain the neural operator. Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks. In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.</p>
+<p>We assume that you are familiar with some fundamental concepts of vector calculus like partial derivatives of multi-variate functions. Some background in Partial Differential Equations (PDEs) and fundamental solutions to PDEs would be ideal as this is the theoretical foundation of Neural Operators, but not strictly necessary.</p>
+<section id="what-are-neural-operators" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-neural-operators">What are Neural Operators?</h2>
+<p>Conventional neural networks have finite-dimensional inputs and outputs, which are represented as vectors. However, many real-world problems are continuous in nature and better represented by a function. Neural Operators are a generalization of neural networks that can learn to map functions to functions. They can be used to solve PDEs, inverse problems, and other tasks that involve finding functions defined over continuous domains. Neural operators can also be applied to learn mappings between neural representations, as neural representations are function representations.</p>
+<div id="fig-neural-operator" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 700px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-neural-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="neural-operator.png" class="img-fluid figure-img" width="700">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-neural-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Principle of neural operators: An input function <span class="math inline">\(a\)</span> is mapped to an output function <span class="math inline">\(u\)</span>.
+</figcaption>
+</figure>
+</div>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<p>The main motivation behind Neural Operators is that some linear PDEs of the form <span class="math inline">\(\mathsf{L}_a u = f\)</span> with parameter functions <span class="math inline">\(a \colon D \to \mathbb{R}^m\)</span> in some domain <span class="math inline">\(D \subset \mathbb{R}^d\)</span> and source term <span class="math inline">\(f\)</span> can be solved by convolution with a fundamental solution <span class="math inline">\(k\)</span> of the PDE. Note that either the source term <span class="math inline">\(f\)</span> or the parameter function <span class="math inline">\(a\)</span> can be fixed, and the other is the input to the solution operator which gives us <span class="math inline">\(u\)</span>. If we want to find the solution for varying <span class="math inline">\(f\)</span>, the solution operator <span class="math inline">\(G \colon f \mapsto u\)</span> mapping a given source term <span class="math inline">\(f\)</span> to the solution <span class="math inline">\(u\)</span> is given by <span id="eq-fundamental-solution"><span class="math display">\[
+u(x) = \int_D k(x, y) f(y) \, dy.
+\tag{1}\]</span></span> While this is only possible for a small set of very specific PDEs, this representation of the solution serves as a basic building block for neural operators, on top of which a deep learning architecture is built. We stress that <a href="#eq-fundamental-solution" class="quarto-xref">Equation&nbsp;1</a> is only a motivation and not a theoretical justification for why neural operators work. In particular, neural operators can be applied to a much wider range of problems such as non-linear PDEs and inverse problems; in particular, in the following, we consider the case where the source term <span class="math inline">\(f\)</span> is fixed and the Neural Operator learns to map a parameter function <span class="math inline">\(a\)</span> to the solution <span class="math inline">\(u\)</span>.</p>
+</section>
+<section id="sec-illustrative-example" class="level3">
+<h3 class="anchored" data-anchor-id="sec-illustrative-example">Illustrative example</h3>
+<p>To illustrate the concept of how Neural Operators solve PDEs, we will consider a simple example of a PDE and return to this example throughout the text to explain the different concepts. The physical model for the Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand). In its two-dimensional form on the unit square <span class="math inline">\(D = [0, 1]^2\)</span>, the Darcy flow equation is given by <span class="math display">\[
+-\nabla \cdot (a(x) \nabla u(x)) = f(x),
+\]</span> where <span class="math inline">\(u(x)\)</span> is the pressure of the fluid, <span class="math inline">\(a(x)\)</span> is the local permeability of the medium, and <span class="math inline">\(f(x)\)</span> is an external source term modeling fluid entering or leaving the system. Without porous medium, fluid flow is given by the pressure gradient <span class="math inline">\(\nabla u\)</span>, so <span class="math inline">\(a(x)\)</span> intuitively acts as a local modifier of the driving force behind the flow. The quantity <span class="math inline">\(a(x) \nabla u(x)\)</span> is called the flux of the fluid, and the Darcy flow equation states that the sources (which are given by the divergence operator <span class="math inline">\(\nabla \cdot\)</span>) of the fluid flux are given by <span class="math inline">\(f\)</span>.</p>
+<p>Fixing the source term <span class="math inline">\(f(x) = 1\)</span> and the boundary condition <span class="math inline">\(u(x) = 0\)</span> (meaning that there is no fluid pressure) on the boundary <span class="math inline">\(\partial D\)</span>, the problem is to find the pressure field <span class="math inline">\(u(x)\)</span> for a given permeability field <span class="math inline">\(a(x)\)</span>. Pairs of <span class="math inline">\(a(x)\)</span> and <span class="math inline">\(u(x)\)</span> are shown in <a href="#fig-darcy-flow" class="quarto-xref">Figure&nbsp;9</a>, where the input function <span class="math inline">\(a(x)\)</span> is shown on the left as a binary scalar field over the unit square, and the corresponding output function <span class="math inline">\(u(x)\)</span> is shown on the right, having a more intricate structure. Note that the images shown in the figure are just <em>discrete representations</em> of the functions <span class="math inline">\(a(x)\)</span> and <span class="math inline">\(u(x)\)</span> defined on the whole domain <span class="math inline">\(D\)</span>, which are the input and output of the PDE problem (and the Neural Operator).</p>
+<p>In the context of Neural Operators, the goal is to learn the inverse <span class="math inline">\(\mathsf{L}_a^{-1}f\)</span> of the differential operator <span class="math inline">\(\mathsf{L}_a = -\nabla \cdot (a(x) \nabla (\cdot))\)</span>, which maps the parameter function <span class="math inline">\(a(x)\)</span> to the solution <span class="math inline">\(u(x)\)</span>. Note that the Darcy flow with a general permeability field <span class="math inline">\(a(x)\)</span> doesn’t have an analytically known fundamental solution, and the mapping from <span class="math inline">\(a(x)\)</span> to <span class="math inline">\(u(x)\)</span> is highly non-linear, so that in order to solve the PDE numerical or machine learning methods are necessary, such as Neural Operators.</p>
+</section>
+<section id="general-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="general-architecture">General architecture</h3>
+<p>Put simply, Neural Operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains. While CNNs feature convolutions with small kernels on regular discrete grids, neural operators have a continuous kernel that is convolved with the whole function in each layer. The general architecture of a Neural Operator is shown in <a href="#fig-no-architecture" class="quarto-xref">Figure&nbsp;2</a>. The input function <span class="math inline">\(a\)</span> (usually represented by a set of query points and corresponding function values—see <a href="#sec-discretization-invariance" class="quarto-xref">Section&nbsp;1.4</a>) is lifted into a (usually higher-dimensional) space by <span class="math inline">\(P\)</span>. Then, the lifted function is processed by a series of layers, each of which applies a convolution with a continuous kernel to the function. The resulting function is added to a linear term <span class="math inline">\(W v\)</span> and then passed through a non-linear activation function; note that this is akin to a skip connection in a CNN. Finally, the result of this computation is projected to the output space by the projection <span class="math inline">\(Q\)</span>, yielding the output function <span class="math inline">\(u\)</span>. Note that the output function can be queried at any point in the domain, which is a key feature of Neural Operators.</p>
+<div id="fig-no-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 700px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-no-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="no-architecture.png" class="img-fluid figure-img" width="700">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-no-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: General architecture of a Neural Operator. The input function <span class="math inline">\(a(x)\)</span> is lifted into a (higher-dimensional) space by <span class="math inline">\(P\)</span>, processed by several Neural Operator layers, and projected to the output space by <span class="math inline">\(Q,\)</span> yielding the output function <span class="math inline">\(u(x)\)</span>. Figure adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-discretization-invariance" class="level3">
+<h3 class="anchored" data-anchor-id="sec-discretization-invariance">Discretization and invariance</h3>
+<p>Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values <span class="math inline">\(\{x_i, a(x_i)\}_i\)</span>. The query points of <span class="math inline">\(u(x)\)</span> are supplied together with the input function, as they need to pass through the whole network. While, in principle, the query points can be arbitrary, in practice they are often chosen to be equidistantly spaced on a grid for computational efficiency. Hence, the true learned operator <span class="math inline">\(\widehat{G} \colon a \mapsto u\)</span> (operating on functions) is approximated by the discretized operator <span class="math inline">\(\widehat{G}_L\)</span>, operating on <span class="math display">\[
+\widehat{G}_L \colon \mathbb{R}^{L \cdot m} \times \mathbb{R}^{L \cdot d} \rightarrow \mathcal{U},
+\]</span> where <span class="math inline">\(L\)</span> is the number of query points of the input function, <span class="math inline">\(d\)</span> and <span class="math inline">\(m\)</span> are the dimensions of the domain <span class="math inline">\(D\)</span> and the image of the input function, respectively, and <span class="math inline">\(\mathcal{U}\)</span> is the function space of the output function. Notably, the output function <span class="math inline">\(u(x)\)</span> can be evaluated at any set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. This allows for “zero-shot super resolution”, i.e., the output function can be evaluated at arbitrarily high resolution without the need to retrain the neural operator at different resolutions.</p>
+<p>Discretization invariance refers to the fact that <span class="math inline">\(\widehat{G}_L\)</span> converges to <span class="math inline">\(\widehat{G}\)</span> as <span class="math inline">\(L \to \infty\)</span> (under some mild conditions to the distribution of the query points). Again, increasing <span class="math inline">\(L\)</span> does not require retraining the Neural Operator. Note that some other papers have claimed that Neural Operators are not necessarily discretization invariant (e.g., <span class="citation" data-cites="Wang2023">Wang and Golland (<a href="#ref-Wang2023" role="doc-biblioref">2023</a>)</span>); this is a topic of ongoing research.</p>
+<div id="fig-discretiation-invariance" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 500px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discretiation-invariance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="discretization-invariance.png" class="img-fluid figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discretiation-invariance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Neural Operators are discretization invariant. The output can be evaluated at an arbitrary set of query points, which do not have to be the same as the query points of the input function, or the query points used for training. Figure adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>.
+</figcaption>
+</figure>
+</div>
+<p>In our example of the Darcy flow from <a href="#sec-illustrative-example" class="quarto-xref">Section&nbsp;1.2</a> and <a href="#fig-darcy-flow" class="quarto-xref">Figure&nbsp;9</a>, the input function <span class="math inline">\(a(x)\)</span> is discretized on a grid of <span class="math inline">\(L = 16 \times 16 = 256\)</span> query points, resulting in a matrix with <span class="math inline">\(256\)</span> rows of the form <span class="math inline">\(\{x_{i,1}, x_{i,2}, a(x_{i})\}\)</span> being supplied to the Neural Operator. Each row is mapped to a positional embedding by the projection <span class="math inline">\(P\)</span>, and the results are used as values <span class="math inline">\(v(y)\)</span> in the convolution operation. In order to evaluate the output function <span class="math inline">\(u\)</span> at a point <span class="math inline">\(z \in D\)</span>, the query point <span class="math inline">\(z\)</span> is supplied to the Neural Operator together with point evaluations of the input function <span class="math inline">\(a(x)\)</span> to obtain an output value <span class="math inline">\(u(y)\)</span>. Since this can be done for any point <span class="math inline">\(z\)</span>, the output of the Neural Operator is a proper function (meaning infinite resolution), while the input is still a set of query points and function <em>values</em>. If more sampling points of the input function are supplied, discretization invariance ensures that the output function becomes more accurate, converging to the true solution (where the input is the full function <span class="math inline">\(a\)</span>) as the number <span class="math inline">\(L\)</span> of query points goes to infinity. Notably, this doesn’t require retraining the Neural Operator.</p>
+</section>
+</section>
+<section id="different-ways-to-represent-the-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="different-ways-to-represent-the-kernel">Different ways to represent the kernel</h2>
+<p>The bottleneck of Neural Operators is the convolution operation, the cost of which scales with the product of input and output size. Assuming that input and output are queried at the same <span class="math inline">\(L\)</span> points, the complexity of the convolution is <span class="math inline">\(\mathcal{O}(L^2)\)</span>, which is infeasible for most applications. Fortunately, there are multiple ways to speed up the computation of the convolution based on the structure of the kernel, which we will shortly describe in the following (for details see <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>).</p>
+<section id="graph-neural-operators" class="level3">
+<h3 class="anchored" data-anchor-id="graph-neural-operators">Graph Neural Operators</h3>
+<p>Instead of taking into account the full space of pairs of sample points, we can limit the evaluation of the kernel to pairs of points that are close to each other. In practice, this can be done by constructing a graph that connects points that are within a certain distance of each other by using a nearest neighbor search. It is then advantageous to use graph neural networks to compute the convolution operation on this graph structure, and to be able to backpropagate easily through this operation. This reduces the complexity to <span class="math inline">\(\mathcal{O}(kL)\)</span>, where <span class="math inline">\(k\)</span> is the maximal number of neighbors within a specified distance. Note that <span class="math inline">\(k\)</span> can, in general, not be chosen independently of <span class="math inline">\(L\)</span> (the number of query points of the input function) as <span class="math inline">\(L\)</span> increases.</p>
+<div id="fig-kernel-gno" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 400px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kernel-gno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kernel-gno.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kernel-gno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Kernel representation of a GNO (adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>)
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="multipole-graph-neural-operators" class="level3">
+<h3 class="anchored" data-anchor-id="multipole-graph-neural-operators">Multipole Graph Neural Operators</h3>
+<p>Graph Neural Operators only take nearest neighbor interactions into account. While this might be sufficient for some applications, long-range interactions also play a crucial role in many real-world problems (e.g., celestial mechanics, or electrodynamics). Drawing from ideas of the fast multipole method (FMM) presented in <span class="citation" data-cites="FMM">Greengard and Rokhlin (<a href="#ref-FMM" role="doc-biblioref">1987</a>)</span>, Multipole Graph Neural Operators (MGNOs) use a hierarchical sequence of graphs to approximate the convolution operation. Every node in one of these graphs summarizes the information of a group of nodes in the previous hierarchy level as shown in <a href="#fig-kernel-mgno" class="quarto-xref">Figure&nbsp;5</a>, and every level of the hierarchy gives rise to a certain scale-dependent component of the kernel. While the details are complex, the idea is similar to enlarging the context window of a CNN by using a sequence of convolutional layers with small kernel sizes. This reduces the complexity to <span class="math inline">\(\mathcal{O}(L)\)</span>.</p>
+<div id="fig-kernel-mgno" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 250px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kernel-mgno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kernel-mgno.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kernel-mgno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Multi-level graph used in MGNOs (adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>)
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="low-rank-neural-operators" class="level3">
+<h3 class="anchored" data-anchor-id="low-rank-neural-operators">Low-rank Neural Operators</h3>
+<p>By assuming that the kernel can be approximated by a low-rank factorization, <span class="math display">\[k(x, y) \approx \sum_{i=1}^r \varphi_i(x) \varphi_i(y),\]</span> with learnable functions <span class="math inline">\(\varphi_i \colon D \to \mathbb{R}\)</span>, and <span class="math inline">\(r \ll L\)</span>, the convolution operation can be computed in <span class="math inline">\(\mathcal{O}(rL)\)</span>. While this can significantly reduce the computational cost, it is important to note that the low-rank assumption might not hold for all problems and that the choice of low-rank approximation (i.e., the functions <span class="math inline">\(\varphi\)</span>) can be crucial but non-trivial.</p>
+<div id="fig-kernel-lno" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 400px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kernel-lno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kernel-lno.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kernel-lno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Kernel representation of a LNO (adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>)
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="fourier-neural-operators" class="level3">
+<h3 class="anchored" data-anchor-id="fourier-neural-operators">Fourier Neural Operators</h3>
+<p>Fourier Neural Operators (FNOs) are based on the Fourier representation of the convolution operation: <span class="math display">\[\int_D k(x, y) v(y) \, dy = \mathcal{F}^{-1}(\mathcal{F}(k) \odot \mathcal{F}(v)),\]</span> where <span class="math inline">\(\mathcal{F}\)</span> is the Fourier transform, and <span class="math inline">\(\odot\)</span> denotes the element-wise vector or matrix product. In practice, this seems to give the best results and can be combined with low-pass filtering to reduce the computational cost even further; see <a href="#fig-kernel-fno" class="quarto-xref">Figure&nbsp;7</a>, where the Fourier representation <span class="math inline">\(R\)</span> of the kernel is learned and only low frequencies are propagated through the network.</p>
+<p>While, in general, computing the Fourier transform scales quadratically with the input size, the fast Fourier transform (FFT) can be used to compute it in almost linear time if the input grid is uniform on a periodic domain (which by embedding the domain <span class="math inline">\(D\)</span> in a larger domain and extending the input function by zero padding can be achieved for many applications). In this case, the complexity of the convolution operation is <span class="math inline">\(\mathcal{O}(L \log L)\)</span>.</p>
+<div id="fig-kernel-fno" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 400px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kernel-fno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kernel-fno.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kernel-fno-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Kernel representation of a FNO (adapted from <span class="citation" data-cites="Li2021">Li et al. (<a href="#ref-Li2021" role="doc-biblioref">2021</a>)</span>)
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="practical-examples" class="level2">
+<h2 class="anchored" data-anchor-id="practical-examples">Practical examples</h2>
+<p><span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span> provides various examples of solving PDEs with Neural Operators. We picked three examples here that (i) compare the performance of neural operators to the analytic solution, (ii) show a simple example that you can train yourself with code provided by the authors, and (iii) demonstrate how Neural Operators can solve inverse problems much faster than classical methods.</p>
+<p>Note that, in order to generate training data, in <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span> the PDEs were solved with classical numerical methods, such as finite differences, finite elements, or spectral methods; see, e.g., <span class="citation" data-cites="Bartels2018">Bartels (<a href="#ref-Bartels2018" role="doc-biblioref">2018</a>)</span>. Of note, all of these methods require knowledge of the PDE that models the physical phenomenon of interest, and they take significant resources to implement and compute the solution. While using data from classical methods to train is one common approach, it is also possible to train neural operators directly from data, which was done, for example, in the FourCastNet paper <span class="citation" data-cites="Pathak2022">(<a href="#ref-Pathak2022" role="doc-biblioref">Pathak et al. 2022</a>)</span>, and is an active area of research.</p>
+<section id="poisson-equation-compare-fundamental-solutions" class="level3">
+<h3 class="anchored" data-anchor-id="poisson-equation-compare-fundamental-solutions">Poisson equation: compare fundamental solutions</h3>
+<p>The Poisson equation is a fairly simple PDE that has an analytical solution. We can use this to check how well the Neural Operator approximates the ground truth. The Poisson equation is given by <span class="math display">\[
+-\frac{\partial^2 u}{\partial x^2} = f(x), \quad x \in (0, 1),
+\]</span> with boundary conditions <span class="math inline">\(u(0) = u(1) = 0\)</span>. The fundamental solution (also called Green’s function) is given by <span class="math display">\[
+k(x, y) = \frac{1}{2}(x+y - |y-x|) - xy,
+\]</span> so the solution for any <span class="math inline">\(f\)</span> is given by <span class="math display">\[
+u(x) = \int_0^1 k(x, y) f(y) \, dy.
+\]</span> Note that—as pointed out previously—a fundamental solution does not exist for every PDE—only a subset of linear PDEs with appropriate boundary conditions have one. A full Neural Operator architecture has several layers and thus, we don’t usually have a direct representation of the fundamental solution, either. This simple example of a Poisson equation was trained with a single layer, no bias and linear skip connection, and identity activation, so that the learned kernel is directly interpretable as the fundamental solution and can be compared to the ground truth. <a href="#fig-poisson-equation" class="quarto-xref">Figure&nbsp;8</a> shows both the analytic fundamental solution and the learned kernel. Of note, they are not exactly the same, but qualitatively similar, which gives rise to the good generalization properties when querying the output function at arbitrary points.</p>
+<div id="fig-poisson-equation" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 500px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-poisson-equation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="poisson-equation.png" class="img-fluid figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-poisson-equation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Comparison of the fundamental solution and the learned kernel for the Poisson equation (adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>).
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="darcy-flow-train-a-simple-neural-operator-yourself" class="level3">
+<h3 class="anchored" data-anchor-id="darcy-flow-train-a-simple-neural-operator-yourself">Darcy flow: train a simple Neural Operator yourself</h3>
+<p>We again turn to the Darcy flow problem from <a href="#sec-illustrative-example" class="quarto-xref">Section&nbsp;1.2</a>. <a href="#fig-darcy-flow-dataset" class="quarto-xref">Figure&nbsp;9 (a)</a> shows an illustrative training dataset for the Darcy flow problem including the input function, output function and positional embedding. <a href="#fig-darcy-flow-prediction" class="quarto-xref">Figure&nbsp;9 (b)</a> shows the prediction of the trained Neural Operator for three different input functions <span class="math inline">\(a(x)\)</span>, and ground truth for comparison. The shown examples were reproduced by code provided by the authors (see <a href="#sec-resources">resources</a> for links). They were trained on a <span class="math inline">\(16 \times 16\)</span> grid, which requires minimal computation, so you can easily train them yourself on a standard cpu.</p>
+<p>Note that this example actually uses a slightly adapted version of the training process, where both trained frequencies and the resolution of the input data are increased incrementally. The Incremental Fourier Neural Operator (iFNO) was introduced in <span class="citation" data-cites="George2022">George et al. (<a href="#ref-George2022" role="doc-biblioref">2022</a>)</span>.</p>
+<div id="fig-darcy-flow" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-darcy-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-darcy-flow" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-darcy-flow-dataset" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-darcy-flow-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="darcy-flow-dataset.png" id="fig-darcy-flow-dataset" class="img-fluid figure-img" data-ref-parent="fig-darcy-flow">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-darcy-flow-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a)
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-darcy-flow" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-darcy-flow-prediction" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-darcy-flow-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="darcy-flow-prediction.png" id="fig-darcy-flow-prediction" class="img-fluid figure-img" data-ref-parent="fig-darcy-flow">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-darcy-flow-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-darcy-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions <span class="math inline">\(a(x)\)</span> (left) and ground truth (middle) for comparison. Figures recreated and adapted from resources [3] and [4].
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="inverse-problems-solve-them-much-faster-than-classical-methods" class="level3">
+<h3 class="anchored" data-anchor-id="inverse-problems-solve-them-much-faster-than-classical-methods">Inverse problems: solve them much faster than classical methods</h3>
+<p>Neural Operators can also be applied to efficiently solve Bayesian inverse problems, where the goal is to recover the initial condition or coefficient functions of a PDE from noisy observations. Here, we look at a simulation of a two-dimensional viscous, incompressible fluid flow governed by the Navier–Stokes equations in their vorticity-streamfunction formulation. We’ll skip the details of the PDE and just note the general setup: <a href="#fig-inverse-problem" class="quarto-xref">Figure&nbsp;10</a> (left column) shows the initial condition at timepoint <span class="math inline">\(t=0\)</span> and the corresponding state at timepoint <span class="math inline">\(t=50\)</span>. The goal is to recover the initial condition from sampling the state at timepoint <span class="math inline">\(t=50\)</span> which is affected by noise.</p>
+<p>For solving the inverse problem for a single state, a classical method (middle column) based on spectral methods took 18 hours to compute the solution <span class="citation" data-cites="Kovachki2021">(<a href="#ref-Kovachki2021" role="doc-biblioref">Kovachki et al. 2022</a>)</span>.</p>
+<p>Meanwhile, a Fourier Neural Operator (FNO) for solving the inverse problem can be trained on training data pairs obtained by forward simulation using classical methods. After training of the Neural Operator, which took 12 hours (including generation of training data), solving the inverse problem for each new single state takes only 2.5 minutes (right column), making this approach much more efficient than solving the whole inverse problem with classical methods.</p>
+<div id="fig-inverse-problem" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 650px; margin: auto; text-align: center;">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-inverse-problem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="baysian-inverse-problem.png" class="img-fluid figure-img" width="650">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-inverse-problem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Solving an inverse problem with classical methods and Fourier Neural Operator. Left column: Ground truth initial condition at timepoint <span class="math inline">\(t=0\)</span> (top) and the corresponding state at timepoint <span class="math inline">\(t=50\)</span> (bottom), where the sample points are shown as circles. Middle column: Recovered initial condition from the ground truth at timepoint <span class="math inline">\(t=50\)</span> using a classical method (top) and the correponding state at <span class="math inline">\(t=50\)</span> (bottom) for comparison. Right column: Recovered initial condition from the ground truth at timepoint <span class="math inline">\(t=50\)</span> using a Fourier Neural Operator (top) and the corresponding state at <span class="math inline">\(t=50\)</span> (bottom) for comparison. Figure adapted from <span class="citation" data-cites="Kovachki2021">Kovachki et al. (<a href="#ref-Kovachki2021" role="doc-biblioref">2022</a>)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="applications-in-computer-vision" class="level2">
+<h2 class="anchored" data-anchor-id="applications-in-computer-vision">Applications in computer vision</h2>
+<p>Neural Operators have been successfully applied to real-world problems, including weather forecasting <span class="citation" data-cites="Pathak2022">(<a href="#ref-Pathak2022" role="doc-biblioref">Pathak et al. 2022</a>)</span> (see also our blog post on <a href="../../posts/FourCastNet/index.html">FourCastNet</a>) and CO2 storage <span class="citation" data-cites="Wen2023">(<a href="#ref-Wen2023" role="doc-biblioref">Wen et al. 2023</a>)</span>.</p>
+<p>Moreover, Neural Operator learning is not restricted to PDEs, but can also be applied to computer vision tasks: images can naturally be viewed as real-valued function on 2D domains, and videos add a temporal structure. Examples of computer vision tasks that have been successfully tackled with Neural Operators include image inpainting, super-resolution, image segmentation and classification <span class="citation" data-cites="Chi2020 Guibas2022 Wei2023 Wong2023">(<a href="#ref-Chi2020" role="doc-biblioref">Chi, Jiang, and Mu 2020</a>; <a href="#ref-Guibas2022" role="doc-biblioref">Guibas et al. 2022</a>; <a href="#ref-Wei2023" role="doc-biblioref">Wei and Zhang 2023</a>; <a href="#ref-Wong2023" role="doc-biblioref">Wong, Wang, and Syeda-Mahmood 2023</a>)</span>.</p>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key takeaways</h2>
+<ul>
+<li>Neural Operators are a cool tool for simulating real-world problems with neural networks, combining concepts from PDE theory and known neural network architectures.</li>
+<li>The performance gains and trainability from data that Neural Operators promise might help to overcome fundamental problems in biological problems. This could mean a renaissance for simulation-based approaches in biological sciences. While the highest computational effficieny is achieved in somewhat specific settings (e.g., requiring uniform grids), more research is currently being done to extend this efficiency to more general settings.</li>
+<li>With all the talk about mapping functions to functions, Neural Operators are still working with discrete (though arbitrary) query points. Whether this will be a limitation in the future remains to be seen and more theoretical work is needed to understand Neural Operators better. For example, it is currently being questioned if the concept of discretization invariance holds true in general.</li>
+<li>The authors provide a codebase for Neural Operators in PyTorch, so they can easily be adopted. Furthermore, there is a growing community around Neural Operators, extending the concepts and implementations to new problems such as computer vision tasks (with close links to transformers).</li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Bartels2018" class="csl-entry" role="listitem">
+Bartels, Sören. 2018. <em>Numerical Approximation of Partial Differential Equations</em>. Cham, Switzerland: Springer. <a href="https://doi.org/10.1007/978-3-319-32354-1">https://doi.org/10.1007/978-3-319-32354-1</a>.
+</div>
+<div id="ref-Chi2020" class="csl-entry" role="listitem">
+Chi, Lu, Borui Jiang, and Yadong Mu. 2020. <span>“Fast Fourier Convolution.”</span> In <em>Advances in Neural Information Processing Systems</em>, 33:4479–88. <a href="https://proceedings.neurips.cc/paper/2020/file/2fd5d41ec6cfab47e32164d5624269b1-Paper.pdf">https://proceedings.neurips.cc/paper/2020/file/2fd5d41ec6cfab47e32164d5624269b1-Paper.pdf</a>.
+</div>
+<div id="ref-George2022" class="csl-entry" role="listitem">
+George, Robert Joseph, Jiawei Zhao, Jean Kossaifi, Zongyi Li, and Anima Anandkumar. 2022. <span>“Incremental Spatial and Spectral Learning of Neural Operators for Solving Large-Scale PDEs.”</span> <em>arXiv Preprint arXiv:2211.15188</em>. <a href="https://arxiv.org/abs/2211.15188">https://arxiv.org/abs/2211.15188</a>.
+</div>
+<div id="ref-FMM" class="csl-entry" role="listitem">
+Greengard, Leslie, and Vladimir Rokhlin. 1987. <span>“A Fast Algorithm for Particle Simulations.”</span> <em>Journal of Computational Physics</em> 73 (2): 325–48. <a href="https://doi.org/10.1016/0021-9991(87)90140-9">https://doi.org/10.1016/0021-9991(87)90140-9</a>.
+</div>
+<div id="ref-Guibas2022" class="csl-entry" role="listitem">
+Guibas, John, Morteza Mardani, Zongyi Li, Andrew Tao, Anima Anandkumar, and Bryan Catanzaro. 2022. <span>“Adaptive Fourier Neural Operators: Efficient Token Mixers for Transformers.”</span> In <em>International Conference on Learning Representations</em>. <a href="https://arxiv.org/abs/2111.13587">https://arxiv.org/abs/2111.13587</a>.
+</div>
+<div id="ref-Kovachki2021" class="csl-entry" role="listitem">
+Kovachki, Nikola B., Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew M. Stuart, and Anima Anandkumar. 2022. <span>“Neural Operator: Learning Maps Between Function Spaces.”</span> <em>Journal of Machine Learning Research</em> 23 (182): 1–63. <a href="https://arxiv.org/abs/2108.08481">https://arxiv.org/abs/2108.08481</a>.
+</div>
+<div id="ref-Li2021" class="csl-entry" role="listitem">
+Li, Zongyi, Nikola B. Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew M. Stuart, and Anima Anandkumar. 2021. <span>“Fourier Neural Operator for Parametric Partial Differential Equations.”</span> In <em>International Conference on Learning Representations</em>. <a href="https://arxiv.org/abs/2010.08895">https://arxiv.org/abs/2010.08895</a>.
+</div>
+<div id="ref-Pathak2022" class="csl-entry" role="listitem">
+Pathak, Jaideep, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani, Thorsten Kurth, et al. 2022. <span>“FourCastNet: A Global Data-Driven High-Resolution Weather Model Using Adaptive Fourier Neural Operators.”</span> In <em>SC22: International Conference for High Performance Computing, Networking, Storage and Analysis</em>, 1–12. <a href="https://doi.org/10.1109/SC41405.2022.00013">https://doi.org/10.1109/SC41405.2022.00013</a>.
+</div>
+<div id="ref-Wang2023" class="csl-entry" role="listitem">
+Wang, Clinton J., and Polina Golland. 2023. <span>“Discretization Invariant Networks for Learning Maps Between Neural Fields.”</span> <em>arXiv Preprint arXiv:2206.01178</em>. <a href="https://arxiv.org/abs/2206.01178">https://arxiv.org/abs/2206.01178</a>.
+</div>
+<div id="ref-Wei2023" class="csl-entry" role="listitem">
+Wei, Min, and Xuesong Zhang. 2023. <span>“Super-Resolution Neural Operator.”</span> <em>arXiv Preprint arXiv:2303.02584</em>. <a href="https://arxiv.org/abs/2303.02584">https://arxiv.org/abs/2303.02584</a>.
+</div>
+<div id="ref-Wen2023" class="csl-entry" role="listitem">
+Wen, Gege, Zongyi Li, Qirui Long, Kamyar Azizzadenesheli, Anima Anandkumar, and Sally M. Benson. 2023. <span>“Real-Time High-Resolution CO<span class="math inline">\(_2\)</span> Geological Storage Prediction Using Nested Fourier Neural Operators.”</span> <em>Energy and AI</em> 12: 100199. <a href="https://doi.org/10.1016/j.egyai.2022.100199">https://doi.org/10.1016/j.egyai.2022.100199</a>.
+</div>
+<div id="ref-Wong2023" class="csl-entry" role="listitem">
+Wong, Ken C. L., Hongzhi Wang, and Tanveer Syeda-Mahmood. 2023. <span>“<span>FNOSeg3D</span>: Resolution-Robust 3D Image Segmentation with Fourier Neural Operator.”</span> In <em>Proceedings of the IEEE 20th International Symposium on Biomedical Imaging (ISBI)</em>, 1–5. <a href="https://doi.org/10.1109/ISBI53787.2023.10230586">https://doi.org/10.1109/ISBI53787.2023.10230586</a>.
+</div>
+</div>
+</section>
+<section id="sec-resources" class="level2">
+<h2 class="anchored" data-anchor-id="sec-resources">Resources</h2>
+<p>[1] Neural Operators in PyTorch <a href="https://neuraloperator.github.io/dev/index.html"><span class="emoji" data-emoji="link">🔗</span></a><br>
+[2] Darcy flow using Fourier Neural Operators in NVIDIA Modulus <a href="https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html"><span class="emoji" data-emoji="link">🔗</span></a><br>
+[3] Plot Darcy Flow dataset in Python <a href="https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py"><span class="emoji" data-emoji="link">🔗</span></a><br>
+[4] Train incremental Darcy Flow example with PyTorch <a href="https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py"><span class="emoji" data-emoji="link">🔗</span></a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/janelia-cvml\.github\.io\/blog");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
