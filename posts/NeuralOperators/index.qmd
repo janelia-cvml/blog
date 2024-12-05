@@ -1,7 +1,7 @@
 ---
 title: "Neural Operators"
 from: markdown+emoji
-description: "An Introduction to Neural Networks on Continuous Domains"
+description: "An Introduction to Neural Networks Operating on Function Spaces"
 author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
 bibliography: references.bib
@@ -11,12 +11,14 @@ image: "no-architecture.png"  # Optional
 
 *Neural Operators [@Kovachki2021] and Fourier Neural Operator [@Li2021] papers were presented by Michael Innerberger and Magdalena Schneider in Janelia CVML 2024-11-01 (and discussed in this blog post), Adaptive Fourier Neural Operator [@Guibas2022] and FourCastNet [@Pathak2022] papers were presented by Magdalena Schneider and Kristin Branson in Janelia CVML 2024-11-08 (see blog post on [FourCastNet](../FourCastNet/index.qmd))*
 
-Neural Operators are a generalization of neural networks to continuous domains, i.e., they learn to map functions to other functions.
+Neural Operators extend the concept of neural networks to work directly with functions rather than discrete data points.
+While neural networks typically take vectors or tensors as inputs and produce similar outputs, Neural Operators learn mappings between entire functions.
 A major advantage of neural operators is their (presumed) discretization invariance, which allows for zero-shot super resolution, meaning that the output function can be evaluated at an arbitrary set of query points without the need to retrain the neural operator.
 Originally developed for solving PDEs, neural operators have been successfully applied to a wide range of problems, including computer vision tasks.
 In this blog post, we will introduce the concept of neural operators, discuss different ways to represent the kernel, and present some hands-on examples.
 
-We assume that you are familiar with the very basics of Partial Differential Equations (PDEs) and fundamental solutions to PDEs as this is the theoretical foundation of Neural Operators.
+We assume that you are familiar with some fundamental concepts of vector calculus like partial derivatives of multi-variate functions.
+Some background in Partial Differential Equations (PDEs) and fundamental solutions to PDEs would be ideal as this is the theoretical foundation of Neural Operators, but not strictly necessary.
 
 
 ## What are Neural Operators?
@@ -24,7 +26,7 @@ We assume that you are familiar with the very basics of Partial Differential Equ
 Conventional neural networks have finite-dimensional inputs and outputs, which are represented as vectors.
 However, many real-world problems are continuous in nature and better represented by a function.
 Neural Operators are a generalization of neural networks that can learn to map functions to functions.
-They can be used to solve PDEs, inverse problems, and other tasks that involve finding continuous functions.
+They can be used to solve PDEs, inverse problems, and other tasks that involve finding functions defined over continuous domains.
 Neural operators can also be applied to learn mappings between neural representations, as neural representations are function representations.
 
 ::: {#fig-neural-operator style="width: 700px; margin: auto; text-align: center;"}
@@ -44,6 +46,25 @@ While this is only possible for a small set of very specific PDEs, this represen
 We stress that @eq-fundamental-solution is only a motivation and not a theoretical justification for why neural operators work.
 In particular, neural operators can be applied to a much wider range of problems such as non-linear PDEs and inverse problems; in particular, in the following, we consider the case where the source term $f$ is fixed and the Neural Operator learns to map a parameter function $a$ to the solution $u$.
 
+### Illustrative example {#sec-illustrative-example}
+To illustrate the concept of how Neural Operators solve PDEs, we will consider a simple example of a PDE and return to this example throughout the text to explain the different concepts.
+The physical model for the Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand).
+In its two-dimensional form on the unit square $D = [0, 1]^2$, the Darcy flow equation is given by
+$$
+-\nabla \cdot (a(x) \nabla u(x)) = f(x),
+$$
+where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term modeling fluid entering or leaving the system.
+Without porous medium, fluid flow is given by the pressure gradient $\nabla u$, so $a(x)$ intuitively acts as a local modifier of the driving force behind the flow.
+The quantity $a(x) \nabla u(x)$ is called the flux of the fluid, and the Darcy flow equation states that the sources (which are given by the divergence operator $\nabla \cdot$) of the fluid flux are given by $f$.
+
+Fixing the source term $f(x) = 1$ and the boundary condition $u(x) = 0$ (meaning that there is no fluid pressure) on the boundary $\partial D$, the problem is to find the pressure field $u(x)$ for a given permeability field $a(x)$.
+Pairs of $a(x)$ and $u(x)$ are shown in @fig-darcy-flow, where the input function $a(x)$ is shown on the left as a binary scalar field over the unit square, and the corresponding output function $u(x)$ is shown on the right, having a more intricate structure.
+Note that the images shown in the figure are just *discrete representations* of the functions $a(x)$ and $u(x)$ defined on the whole domain $D$, which are the input and output of the PDE problem (and the Neural Operator).
+
+In the context of Neural Operators, the goal is to learn the inverse $\mathsf{L}_a^{-1}f$ of the differential operator $\mathsf{L}_a = -\nabla \cdot (a(x) \nabla (\cdot))$, which maps the parameter function $a(x)$ to the solution $u(x)$.
+Note that the Darcy flow with a general permeability field $a(x)$ doesn't have an analytically known fundamental solution, and the mapping from $a(x)$ to $u(x)$ is highly non-linear, so that in order to solve the PDE numerical or machine learning methods are necessary, such as Neural Operators.
+
+
 
 ### General architecture
 Put simply, Neural Operators can be seen as a generalization of convolutional neural networks (CNNs) to continuous domains.
@@ -60,13 +81,13 @@ Note that the output function can be queried at any point in the domain, which i
 
 General architecture of a Neural Operator.
 The input function $a(x)$ is lifted into a (higher-dimensional) space by $P$, processed by several Neural Operator layers, and projected to the output space by $Q,$ yielding the output function $u(x)$.
-Figure adapted from [Kovachki, 2021](#Kovachki2021).
+Figure adapted from @Kovachki2021.
 :::
 
 
 ### Discretization and invariance{#sec-discretization-invariance}
 
-Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the continuous functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
+Although Neural Operators are designed to learn mappings between functions on continuous domains, for numerical implementation, the functions still needs to be discretized, i.e., represented by a set of query points and corresponding function values $\{x_i, a(x_i)\}_i$.
 The query points of $u(x)$ are supplied together with the input function, as they need to pass through the whole network.
 While, in principle, the query points can be arbitrary, in practice they are often chosen to be equidistantly spaced on a grid for computational efficiency.
 Hence, the true learned operator $\widehat{G} \colon a \mapsto u$ (operating on functions) is approximated by the discretized operator $\widehat{G}_L$, operating on
@@ -91,6 +112,12 @@ Figure adapted from @Kovachki2021.
 :::
 
 
+In our example of the Darcy flow from @sec-illustrative-example and @fig-darcy-flow, the input function $a(x)$ is discretized on a grid of $L = 16 \times 16 = 256$ query points, resulting in a matrix with $256$ rows of the form $\{x_{i,1}, x_{i,2}, a(x_{i})\}$ being supplied to the Neural Operator.
+Each row is mapped to a positional embedding by the projection $P$, and the results are used as values $v(y)$ in the convolution operation.
+In order to evaluate the output function $u$ at a point $z \in D$, the query point $z$ is supplied to the Neural Operator together with point evaluations of the input function $a(x)$ to obtain an output value $u(y)$.
+Since this can be done for any point $z$, the output of the Neural Operator is a proper function (meaning infinite resolution), while the input is still a set of query points and function *values*.
+If more sampling points of the input function are supplied, discretization invariance ensures that the output function becomes more accurate, converging to the true solution (where the input is the full function $a$) as the number $L$ of query points goes to infinity.
+Notably, this doesn't require retraining the Neural Operator.
 
 
 ## Different ways to represent the kernel
@@ -157,7 +184,7 @@ In this case, the complexity of the convolution operation is $\mathcal{O}(L \log
 ::: {#fig-kernel-fno style="width: 400px; margin: auto; text-align: center;"}
 ![](kernel-fno.png){}
 
-Kernel representation of a FNO (adapted from @Li2020)
+Kernel representation of a FNO (adapted from @Li2021)
 :::
 
 
@@ -195,19 +222,12 @@ Of note, they are not exactly the same, but qualitatively similar, which gives r
 ::: {#fig-poisson-equation style="width: 500px; margin: auto; text-align: center;"}
 ![](poisson-equation.png){width=500px}
 
-Comparison of the fundamental solution and the learned kernel for the Poisson equation.
+Comparison of the fundamental solution and the learned kernel for the Poisson equation (adapted from @Kovachki2021).
 :::
 
 
 ### Darcy flow: train a simple Neural Operator yourself
-Darcy flow is a relatively simple PDE that describes the flow of a fluid through a porous medium (e.g., water through sand).
-It is given by
-$$
--\nabla \cdot (a(x) \nabla u(x)) = f(x),
-$$
-where $u(x)$ is the pressure of the fluid, $a(x)$ is the local permeability of the medium, and $f(x)$ is an external source term.
-The boundary conditions are usually $u(x) = u_0$ on the boundary, where $u_0$ is a given value ($u_0=0$ here).
-
+We again turn to the Darcy flow problem from @sec-illustrative-example.
 @fig-darcy-flow-dataset shows an illustrative training dataset for the Darcy flow problem including the input function, output function and positional embedding.
 @fig-darcy-flow-prediction shows the prediction of the trained Neural Operator for three different input functions $a(x)$, and ground truth for comparison.
 The shown examples were reproduced by code provided by the authors (see [resources](#sec-resources) for links). They were trained on a $16 \times 16$ grid, which requires minimal computation, so you can easily train them yourself on a standard cpu.
@@ -221,7 +241,7 @@ The Incremental Fourier Neural Operator (iFNO) was introduced in @George2022.
 
 ![](darcy-flow-prediction.png){#fig-darcy-flow-prediction}
 
-Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison.
+Darcy flow dataset and prediction. (a) Illustrative training dataset for the Darcy flow problem including the input function, output function, and positional embedding. (b) Prediction of the trained Neural Operator (right) for three different input functions $a(x)$ (left) and ground truth (middle) for comparison. Figures recreated and adapted from resources [3] and [4].
 :::
 
 
@@ -244,7 +264,7 @@ After training of the Neural Operator, which took 12 hours (including generation
 Solving an inverse problem with classical methods and Fourier Neural Operator.
 Left column: Ground truth initial condition at timepoint $t=0$ (top) and the corresponding state at timepoint $t=50$ (bottom), where the sample points are shown as circles.
 Middle column: Recovered initial condition from the ground truth at timepoint $t=50$ using a classical method (top) and the correponding state at $t=50$ (bottom) for comparison.
-Right column: Recovered initial condition from the ground truth at timepoint $t=50$ using a Fourier Neural Operator (top) and the corresponding state at $t=50$ (bottom) for comparison.
+Right column: Recovered initial condition from the ground truth at timepoint $t=50$ using a Fourier Neural Operator (top) and the corresponding state at $t=50$ (bottom) for comparison. Figure adapted from @Kovachki2021.
 :::
 
 
@@ -258,6 +278,14 @@ images can naturally be viewed as real-valued function on 2D domains, and videos
 Examples of computer vision tasks that have been successfully tackled with Neural Operators include image inpainting, super-resolution, image segmentation and classification [@Chi2020;@Guibas2022;@Wei2023;@Wong2023].
 
 
+## Key takeaways
+
+* Neural Operators are a cool tool for simulating real-world problems with neural networks, combining concepts from PDE theory and known neural network architectures.
+* The performance gains and trainability from data that Neural Operators promise might help to overcome fundamental problems in biological problems. This could mean a renaissance for simulation-based approaches in biological sciences. While the highest computational effficieny is achieved in somewhat specific settings (e.g., requiring uniform grids), more research is currently being done to extend this efficiency to more general settings.
+* With all the talk about mapping functions to functions, Neural Operators are still working with discrete (though arbitrary) query points. Whether this will be a limitation in the future remains to be seen and more theoretical work is needed to understand Neural Operators better. For example, it is currently being questioned if the concept of discretization invariance holds true in general.
+* The authors provide a codebase for Neural Operators in PyTorch, so they can easily be adopted. Furthermore, there is a growing community around Neural Operators, extending the concepts and implementations to new problems such as computer vision tasks (with close links to transformers).
+
+
 
 ## References
 
@@ -266,7 +294,7 @@ Examples of computer vision tasks that have been successfully tackled with Neura
 
 
 ## Resources{#sec-resources}
-* Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)
-* Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)
-* Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)
-* Train incremental Darcy Flow example with PyTorch [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py)
+[1] Neural Operators in PyTorch [:link:](https://neuraloperator.github.io/dev/index.html)\
+[2] Darcy flow using Fourier Neural Operators in NVIDIA Modulus [:link:](https://docs.nvidia.com/deeplearning/modulus/modulus-v2209/user_guide/neural_operators/darcy_fno.html)\
+[3] Plot Darcy Flow dataset in Python [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_darcy_flow.py)\
+[4] Train incremental Darcy Flow example with PyTorch [:link:](https://github.com/neuraloperator/neuraloperator/blob/main/examples/plot_incremental_FNO_darcy.py)
