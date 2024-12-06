@@ -4,7 +4,7 @@ from: markdown+emoji
 description: "Weather forecasting with Adaptive Fourier Neural Operators"
 author: "Kristin Branson and Magdalena Schneider"
 date: "2024-11-08"
-categories: [AIForScience, NumericalMethods, Transformers, NeuralOperators, Weather, Forecasting]
+categories: [AI for Science, Numerical Methods, Transformers, Neural Operators, Weather, Forecasting]
 image: "FourCastNetArchitecture.png"  # Optional
 ---
 

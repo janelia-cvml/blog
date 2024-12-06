@@ -5,7 +5,7 @@ description: "An Introduction to Neural Networks Operating on Function Spaces"
 author: "Magdalena Schneider and Michael Innerberger"
 date: "2024-11-29"
 bibliography: references.bib
-categories: [AIForScience, Partial Differential Equations, Numerical Methods, NeuralOperators]
+categories: [AI for Science, Partial Differential Equations, Numerical Methods, Neural Operators]
 image: "no-architecture.png"  # Optional
 ---
 
