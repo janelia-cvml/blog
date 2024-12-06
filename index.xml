@@ -16,17 +16,17 @@
 <height>53</height>
 <width>144</width>
 </image>
-<generator>quarto-1.6.33</generator>
+<generator>quarto-1.5.54</generator>
 <lastBuildDate>Fri, 29 Nov 2024 05:00:00 GMT</lastBuildDate>
 <item>
   <title>Neural Operators</title>
   <dc:creator>Magdalena Schneider and Michael Innerberger</dc:creator>
   <link>https://janelia-cvml.github.io/blog/posts/NeuralOperators/</link>
   <description><![CDATA[ An Introduction to Neural Networks Operating on Function Spaces ]]></description>
-  <category>AIForScience</category>
+  <category>AI for Science</category>
   <category>Partial Differential Equations</category>
   <category>Numerical Methods</category>
-  <category>NeuralOperators</category>
+  <category>Neural Operators</category>
   <guid>https://janelia-cvml.github.io/blog/posts/NeuralOperators/</guid>
   <pubDate>Fri, 29 Nov 2024 05:00:00 GMT</pubDate>
   <media:content url="https://janelia-cvml.github.io/blog/posts/NeuralOperators/no-architecture.png" medium="image" type="image/png" height="61" width="144"/>
@@ -36,10 +36,10 @@
   <dc:creator>Kristin Branson and Magdalena Schneider</dc:creator>
   <link>https://janelia-cvml.github.io/blog/posts/FourCastNet/</link>
   <description><![CDATA[ Weather forecasting with Adaptive Fourier Neural Operators ]]></description>
-  <category>AIForScience</category>
-  <category>NumericalMethods</category>
+  <category>AI for Science</category>
+  <category>Numerical Methods</category>
   <category>Transformers</category>
-  <category>NeuralOperators</category>
+  <category>Neural Operators</category>
   <category>Weather</category>
   <category>Forecasting</category>
   <guid>https://janelia-cvml.github.io/blog/posts/FourCastNet/</guid>
