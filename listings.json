@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/LargeConceptModels/index.html",
       "/posts/NeuralOperators/index.html",
       "/posts/FourCastNet/index.html",
       "/posts/2024-11-04-welcome.html"

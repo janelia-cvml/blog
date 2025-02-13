@@ -13,11 +13,21 @@
 <url>https://janelia-cvml.github.io/blog/cvml_300x110.png</url>
 <title>Janelia CVML</title>
 <link>https://janelia-cvml.github.io/blog/</link>
-<height>53</height>
-<width>144</width>
 </image>
-<generator>quarto-1.5.54</generator>
-<lastBuildDate>Fri, 29 Nov 2024 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.6.33</generator>
+<lastBuildDate>Tue, 11 Feb 2025 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Large Concept Models: Language Modeling in a Sentence Representation Space</title>
+  <dc:creator>Kristin Branson</dc:creator>
+  <link>https://janelia-cvml.github.io/blog/posts/LargeConceptModels/</link>
+  <description><![CDATA[ Summary of and thoughts on Meta’s recent paper ]]></description>
+  <category>Transformers</category>
+  <category>Multi Scale</category>
+  <category>Language</category>
+  <guid>https://janelia-cvml.github.io/blog/posts/LargeConceptModels/</guid>
+  <pubDate>Tue, 11 Feb 2025 05:00:00 GMT</pubDate>
+  <media:content url="https://janelia-cvml.github.io/blog/posts/LargeConceptModels/LCMArchitecture.png" medium="image" type="image/png" height="134" width="144"/>
+</item>
 <item>
   <title>Neural Operators</title>
   <dc:creator>Magdalena Schneider and Michael Innerberger</dc:creator>
