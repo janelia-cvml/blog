@@ -20,7 +20,7 @@ I've been interested in what **temporal scales** it makes sense to model time se
 
 [Large Concept Models](https://arxiv.org/abs/2412.08821) is an interesting attempt at explicitly modeling structure at a larger scale: **sentences**. Like spaces between words, punctuation between sentences provides a non-arbitrary way to segment text at a scale ~50 times that of word tokens. This work posits that this **sentence-scale representation corresponds to concepts**, hence the paper title. The basic idea implemented is straightforward (@fig-lcm-architecture):
 
-* Use an existing model to **embed sentences** into a "concept" space.
+* Use an existing model ([SONAR](#SONAR)) to **embed sentences** into a "concept" space.
 * Train a transformer that **predicts sentence embeddings** rather than word tokens.
 * At inference, convert predicted sentence embeddings to text through the embedding model's decoder.
 
