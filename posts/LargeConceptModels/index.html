@@ -6,8 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Kristin Branson">
-<meta name="dcterms.date" content="2025-02-11">
+<meta name="author" content="Kristin Branson, with ideas and edits from Diane Adjavon, John Bogovic, and Janelia CVML attendees">
+<meta name="dcterms.date" content="2025-02-14">
 <meta name="description" content="Summary of and thoughts on Meta’s recent paper">
 
 <title>Large Concept Models: Language Modeling in a Sentence Representation Space – Janelia CVML</title>
@@ -177,14 +177,14 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
-               <p>Kristin Branson </p>
+               <p>Kristin Branson, with ideas and edits from Diane Adjavon, John Bogovic, and Janelia CVML attendees </p>
             </div>
     </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 11, 2025</p>
+        <p class="date">February 14, 2025</p>
       </div>
     </div>
     
@@ -217,7 +217,7 @@ Figure&nbsp;1: Large Concept Model (LCM) architecture <a href="#LCMTeam2024">[LC
 <p>I’ve been interested in what <strong>temporal scales</strong> it makes sense to model time series data at. Nearly all language modeling approaches represent text at the word (token) level. There is no explicit representation of the concepts underlying text at larger scales, while it seems like our own internal representations of language exist at multiple scales. Would explicitly representing larger scales improve how well language models capture semantic concepts, model longer-range temporal relationships, even reason? Or does word-token-level modeling implicitly capture this structure?</p>
 <p><a href="https://arxiv.org/abs/2412.08821">Large Concept Models</a> is an interesting attempt at explicitly modeling structure at a larger scale: <strong>sentences</strong>. Like spaces between words, punctuation between sentences provides a non-arbitrary way to segment text at a scale ~50 times that of word tokens. This work posits that this <strong>sentence-scale representation corresponds to concepts</strong>, hence the paper title. The basic idea implemented is straightforward (<a href="#fig-lcm-architecture" class="quarto-xref">Figure&nbsp;1</a>):</p>
 <ul>
-<li>Use an existing model to <strong>embed sentences</strong> into a “concept” space.</li>
+<li>Use an existing model (<a href="#SONAR">SONAR</a>) to <strong>embed sentences</strong> into a “concept” space.</li>
 <li>Train a transformer that <strong>predicts sentence embeddings</strong> rather than word tokens.</li>
 <li>At inference, convert predicted sentence embeddings to text through the embedding model’s decoder.</li>
 </ul>
@@ -234,6 +234,7 @@ Figure&nbsp;2: Sentence length vs embed-ability <a href="#LCMTeam2024">[LCM Team
 </figure>
 </div>
 <p>One question about this approach is the <strong>choice of resolutions</strong>. Does a sentence really correspond to a concept? Or should we rather use parts of speech? Paragraphs? Or should segmentation be something determined based on the text? Should language be modeled at many resolutions at a time? One of the details of the paper was that dividing text into sentences was non-trivial, and the method improved by capping the maximum sentence length at 200 characters, suggesting that the next level of resolution after words perhaps should be shorter than a sentence (<a href="#fig-sentence-length" class="quarto-xref">Figure&nbsp;2</a>).</p>
+<p>This choice could be because the sentence embedding model, SONAR <a href="#SONAR">[Duquenne, 2023]</a> was “trained on … bitext machine translation data containing rather short sentences.” Since its training was targeting machine translation, it is unclear whether it encodes “concepts” or some other semantics of sentences. Future work could explore different choices for the sentence embedding, perhaps seeking to more directly encode “concepts” from sentences, or by training the encoder end-to-end, challenging thought that may be.</p>
 <p>Another question is about the <strong>integration of resolutions</strong>. The model trained here really operated only at the sentence-resolution, with the word encoder/decoder being done completely independently. Not only are the encoder and decoder fixed (as shown in <a href="#fig-lcm-architecture" class="quarto-xref">Figure&nbsp;1</a>), words are not <em>seen or produced</em> by the LCM – both training and inference are done solely at the sentence level. Thus, this model is really a single-resolution model that operates at a larger scale than standard LLMs. This has the benefit of helping greatly with computational complexity, allowing the network to potentially reason over much longer context lengths. However, we suspect that this hurts the quality of the text produced. One caveat to this is that the proposed approaches – the diffusion LCM and quantized LCM – predict the sentence embedding with coarse-to-fine resolution, so perhaps some sub-sentence structure is also represented.</p>
 </section>
 <section id="transformers-for-high-d-continuous-time-series-data" class="level2">
@@ -246,12 +247,12 @@ Figure&nbsp;2: Sentence length vs embed-ability <a href="#LCMTeam2024">[LCM Team
 </ul>
 <section id="diffusion-lcms---details" class="level3">
 <h3 class="anchored" data-anchor-id="diffusion-lcms---details">Diffusion LCMs - details</h3>
-<div id="fig-diffusion-attention" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 200px; float: left; margin-right: 1em;">
+<div id="fig-diffusion-lcm" class="quarto-float quarto-figure quarto-figure-center anchored" style="width: 200px; float: left; margin-right: 1em;">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-diffusion-attention-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="fig-diffusion-lcm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="DiffusionAttentionMasks.png" class="img-fluid figure-img" width="200">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-diffusion-attention-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-diffusion-lcm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;3: Attention mask for training diffusion LCMs <a href="#LCMTeam2024">[LCM Team, 2024]</a>
 </figcaption>
 </figure>
@@ -275,7 +276,7 @@ Figure&nbsp;4: Quantized LCM training architecture (my guess from text)
 </section>
 <section id="coarse-to-fine-predictions" class="level3">
 <h3 class="anchored" data-anchor-id="coarse-to-fine-predictions">Coarse-to-fine predictions</h3>
-<p>A notable commonality between the diffusion LCM and quantized LCM is the <strong>coarse-to-fine</strong> resolution (<span class="math inline">\(t = T, ..., 0\)</span>) for prediction. One question I have is whether this allows more resolutions of language between word and sentence to be represented. While these intermediate scales are part of the prediction, I note that they are not part of the left-context the transformer has access to; they are only used for the current sentence. Still, this could be an interesting avenue to explore in the future – what if they were not so clever with their attention masks (<strong>?@fig-diffusion-lcm</strong>, <a href="#fig-quantized-lcm" class="quarto-xref">Figure&nbsp;4</a>), and allowed intermediate representations in the context? Would this be an avenue to a more multi-resolution language model?</p>
+<p>A notable commonality between the diffusion LCM and quantized LCM is the <strong>coarse-to-fine</strong> resolution (<span class="math inline">\(t = T, ..., 0\)</span>) for prediction. One question I have is whether this allows more resolutions of language between word and sentence to be represented. While these intermediate scales are part of the prediction, I note that they are not part of the left-context the transformer has access to; they are only used for the current sentence. Still, this could be an interesting avenue to explore in the future – what if they were not so clever with their attention masks (<a href="#fig-diffusion-lcm" class="quarto-xref">Figure&nbsp;3</a>, <a href="#fig-quantized-lcm" class="quarto-xref">Figure&nbsp;4</a>), and allowed intermediate representations in the context? Would this be an avenue to a more multi-resolution language model?</p>
 </section>
 </section>
 <section id="experiments" class="level2">
@@ -283,7 +284,7 @@ Figure&nbsp;4: Quantized LCM training architecture (my guess from text)
 <p>The paper includes an <strong>extensive description</strong> of experiments conducted to compare these different LCM models to each other and to word-based LLMs. One of the difficulties with language modeling in general is that there is not a single way to measure which model performs best, and the results comparing LCMs, to me, appear to be <strong>conflicting</strong>, with the baseline model performing best in terms of simple <span class="math inline">\(l_2\)</span> distance, and diffusion models performing better for some more complex metrics while quantization methods perform better for others.</p>
 <p>The authors conclude that “diffusion-based methods give clearly better results compared to all other models”, and I couldn’t tell what this was based on, from the tables of results provided. We noted that there isn’t a single example output in the paper, and think a good rule of thumb with ML experimental sections is you shouldn’t <em>only</em> have example outputs, but you also shouldn’t <em>only</em> have tables of bolded numbers.</p>
 <p>One reason I could imagine the quantized LCM performing worse is because of the choice of the fixed embedding space. The sentence embedding to words decoder is likely not robust to deviations from the sub-space of the 1024-dimensional ambient embedding space that it was trained on, and the diffusion models are likely better than the quantized models at producing examples in that sub-space. By analogy, I’m thinking of how GANs produce more realistic images than VAEs but VAEs may cover the full distribution better, and I think this may be true for diffusion models vs quantized models. Perhaps a text example produced by a diffusion model is harder to distinguish from human text, but fails at capturing the full distribution. Would that be captured by any of these metrics? The authors suggest that training the embedding space to be quantize-able may improve this method.</p>
-<div id="fig-summarization-results" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" style="text-align: center;">
+<div id="fig-summarization-results" class="quarto-float quarto-figure quarto-figure-center anchored" style="text-align: center;" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-summarization-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="SummarizationResults.png" class="img-fluid figure-img" width="600">
