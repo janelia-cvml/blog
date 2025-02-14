@@ -20,7 +20,7 @@ I've been interested in what **temporal scales** it makes sense to model time se
 
 [Large Concept Models](https://arxiv.org/abs/2412.08821) is an interesting attempt at explicitly modeling structure at a larger scale: **sentences**. Like spaces between words, punctuation between sentences provides a non-arbitrary way to segment text at a scale ~50 times that of word tokens. This work posits that this **sentence-scale representation corresponds to concepts**, hence the paper title. The basic idea implemented is straightforward (@fig-lcm-architecture):
 
-* Use an existing model to **embed sentences** into a "concept" space.
+* Use an existing model ([SONAR](#SONAR)) to **embed sentences** into a "concept" space.
 * Train a transformer that **predicts sentence embeddings** rather than word tokens.
 * At inference, convert predicted sentence embeddings to text through the embedding model's decoder.
 
@@ -33,6 +33,10 @@ Sentence length vs embed-ability [[LCM Team, 2024]](#LCMTeam2024)
 :::
 
 One question about this approach is the **choice of resolutions**. Does a sentence really correspond to a concept? Or should we rather use parts of speech? Paragraphs? Or should segmentation be something determined based on the text? Should language be modeled at many resolutions at a time? One of the details of the paper was that dividing text into sentences was non-trivial, and the method improved by capping the maximum sentence length at 200 characters, suggesting that the next level of resolution after words perhaps should be shorter than a sentence (@fig-sentence-length).
+
+This choice could be because the sentence embedding model, SONAR [[Duquenne, 2023]](#SONAR) was "trained on ... bitext machine
+translation data containing rather short sentences." Since its training was targeting machine translation, it is unclear whether
+it encodes "concepts" or some other semantics of sentences. Future work could explore different choices for the sentence embedding, perhaps seeking to more directly encode "concepts" from sentences, or by training the encoder end-to-end, challenging thought that may be.
 
 Another question is about the **integration of resolutions**. The model trained here really operated only at the sentence-resolution, with the word encoder/decoder being done completely independently. Not only are the encoder and decoder fixed (as shown in @fig-lcm-architecture), words are not *seen or produced* by the LCM -- both training and inference are done solely at the sentence level. Thus, this model is really a single-resolution model that operates at a larger scale than standard LLMs. This has the benefit of helping greatly with computational complexity, allowing the network to potentially reason over much longer context lengths. However, we suspect that this hurts the quality of the text produced. One caveat to this is that the proposed approaches -- the diffusion LCM and quantized LCM -- predict the sentence embedding with coarse-to-fine resolution, so perhaps some sub-sentence structure is also represented.
 
