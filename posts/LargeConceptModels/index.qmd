@@ -2,8 +2,8 @@
 title: "Large Concept Models: Language Modeling in a Sentence Representation Space"
 from: markdown+emoji
 description: "Summary of and thoughts on Meta's recent paper"
-author: "Kristin Branson"
-date: "2025-02-11"
+author: "Kristin Branson, with ideas and edits from Diane Adjavon, John Bogovic, and Janelia CVML attendees"
+date: "2025-02-14"
 categories: [Transformers,Multi Scale,Language]
 image: "LCMArchitecture.png"
 ---
