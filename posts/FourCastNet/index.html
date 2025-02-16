@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.33">
+<meta name="generator" content="quarto-1.5.54">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -39,10 +39,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-63335bb52e6afd690ad16d382ee25479.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -220,7 +220,7 @@ Figure&nbsp;1: Improvements in ECWMF forecast accuracy for the northern hemisphe
 </div>
 <p>There’s a pretty <strong>remarkable dataset</strong> available in the realm of AI for science: the <a href="https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.4803">ERA5 global reanalysis</a> dataset, which contains <em>hourly</em> estimates of numerous 3D atmospheric, land, and ocean features at a <em>horizontal resolution of 30 km</em> over the past <em>80 years</em>. This dataset was synthesized from up to 25M-per-day measurements from Earth-observing satellites and weather stations. Can machine learning be used to learn to forecast the weather better, either by more efficiently/effectively solving the weather PDEs or by learning a better model?</p>
 <p>The FourCastNet paper [<a href="#Parthak2022">Pathak, 2022</a>] trains an <strong>Adaptive Fourier Neural Operator</strong> (AFNO) network <a href="#Guibas2022">[Guibas, 2022]</a> to predict a collection of atmospheric variables at the next time step (6 hours into the future) given the current readout for those variables. The AFNO is an interesting choice here: it takes inspiration from both <strong>neural operators</strong>, which were originally designed to efficiently solve PDEs, and <strong>Vision Transformers</strong> (ViT), which can learn complex functions from large image datasets. This choice seems to have been motivated by several factors: (i) We know that weather is well-modeled by PDEs, (ii) the ERA5 dataset can be represented as images where each pixel location corresponds to a <span class="math inline">\(.25^\circ \times .25^\circ\)</span> latitude/longitude region, and each channel corresponds to a different atmospheric variable. So, maybe some amalgam of neural operators and transformers is a feasible choice to capture the nature of this data. Moreover, AFNO promises to combine computational efficiency (i.e., low computational complexity) with a comparably low memory footprint.</p>
-<div id="fig-fourcastnet-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" style="text-align: center;" data-fig-align="center">
+<div id="fig-fourcastnet-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" style="text-align: center;">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-fourcastnet-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="FourCastNetArchitecture.png" class="img-fluid figure-img" width="400">
@@ -237,7 +237,7 @@ Figure&nbsp;2: FourCastNet architecture overview [<a href="#Pathak2022">Pathak, 
 <section id="evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
 <p>Most of the paper is devoted to evaluating the performance of the weather forecasts. They show that their predictions are qualitatively accurate on predicting the formation and trajectory of a cyclone and hurricane, as well as patterns of an atmospheric river within the range of 2–4 days. They quantitatively compare the accuracy of the FourCastNet prediction to the ECMWF’s physics-based Integrated Forecasting System (IFS). Accuracy is worse (with a few exceptions), but comparable. For comparison, more recent ML-based models, including GraphCast <a href="#Lam2023">[Lam, 2023]</a> and GenCast <a href="#Price2024">[Price, 2024]</a> report superior performance to ECMWF.</p>
-<div id="fig-storm-forecasts" class="quarto-float quarto-figure quarto-figure-center anchored" style="text-align: center;" data-fig-align="center">
+<div id="fig-storm-forecasts" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" style="text-align: center;">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-storm-forecasts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="StormFormationForecast.png" class="img-fluid figure-img" width="600">
